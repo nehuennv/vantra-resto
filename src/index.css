@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* VANTRA DARK THEME */
+  --background: 222 47% 11%;
+  /* Slate 900 Profundo */
+  --foreground: 210 40% 98%;
+  --primary: 217 91% 60%;
+  /* Azul Eléctrico */
+  --primary-foreground: 222 47% 11%;
+  --card: 217 33% 17%;
+  --card-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --border: 217 33% 20%;
+}
+
+body {
+  @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30;
+  /* Fondo Premium Fijo */
+  background-image:
+    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.2) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0.2) 0, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
