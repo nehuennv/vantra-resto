@@ -152,35 +152,43 @@ const DashboardPage = () => {
             {/* --- HEADER CONTROL --- */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
 
-                {/* Selector de Turnos */}
+                {/* Selector de Turnos (SIN BORDE AL CLICKEAR + CENTRADO) */}
                 <div className="flex items-center gap-4">
                     {isSplitMode && (
-                        <div className="flex bg-[#18181b] p-1 rounded-2xl border border-white/10 relative">
-                            {/* Fondo animado */}
-                            <motion.div
-                                layoutId="activeTab"
-                                className="absolute bg-white/10 rounded-xl inset-y-1"
-                                style={{
-                                    left: currentShift === 'lunch' ? '4px' : '50%',
-                                    width: 'calc(50% - 4px)'
-                                }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            />
+                        <div className="grid grid-cols-2 bg-[#0F0F10] p-1 rounded-xl border border-white/10 relative h-11 shadow-sm items-center w-[240px]">
                             {[
                                 { id: 'lunch', label: 'Mediodía', icon: Sun },
                                 { id: 'dinner', label: 'Noche', icon: Moon }
-                            ].map((shift) => (
-                                <button
-                                    key={shift.id}
-                                    onClick={() => setCurrentShift(shift.id)}
-                                    className={cn(
-                                        "relative z-10 flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-colors duration-200",
-                                        currentShift === shift.id ? "text-white" : "text-slate-500 hover:text-slate-300"
-                                    )}
-                                >
-                                    <shift.icon size={14} /> {shift.label}
-                                </button>
-                            ))}
+                            ].map((shift) => {
+                                const isActive = currentShift === shift.id;
+                                return (
+                                    <button
+                                        key={shift.id}
+                                        onClick={() => setCurrentShift(shift.id)}
+                                        // AQUÍ ESTÁ LA MAGIA: outline-none focus:outline-none focus:ring-0
+                                        className={cn(
+                                            "relative flex items-center justify-center gap-2 h-full rounded-lg text-xs font-bold transition-colors duration-200 outline-none focus:outline-none focus:ring-0",
+                                            isActive ? "text-white" : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]"
+                                        )}
+                                    >
+                                        {/* Fondo Animado (Magic Motion) */}
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="activeTab"
+                                                className="absolute inset-0 bg-white/5 rounded-lg border border-white/5 shadow-sm"
+                                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                                style={{ zIndex: 0 }}
+                                            />
+                                        )}
+
+                                        {/* Contenido (Texto + Icono) */}
+                                        <span className="relative z-10 flex items-center gap-2">
+                                            <shift.icon size={14} className={cn("transition-transform", isActive && "scale-110")} />
+                                            {shift.label}
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -351,76 +359,71 @@ const DashboardPage = () => {
                     </div>
                 </BentoCard>
 
-                {/* 3. VANTRA INTELLIGENCE (TARJETA QUE ABRE MODAL) */}
+                {/* 3. VANTRA INTELLIGENCE (VERSIÓN FINAL) */}
                 <BentoCard
                     title="Vantra Intelligence"
-                    icon={Sparkles}
+                    icon={Sparkles} // Usamos Sparkles que ya está importado
                     delay={0.4}
                     className="lg:col-span-1 min-h-[180px]"
-                    // Gradiente sutil si el estado NO es nominal
-                    gradient={aiReport.color !== 'emerald'}
                 >
-                    <div className="flex flex-col h-full justify-between relative z-10">
-                        <div className="flex items-start gap-3 mt-2">
+                    <div className="flex flex-col h-full justify-between mt-2">
+
+                        {/* CONTENIDO PRINCIPAL */}
+                        <div className="flex gap-4 items-start">
+                            {/* Icono de Estado (Sin logos raros, solo color y luz) */}
                             <div className={cn(
-                                "p-2 rounded-lg shrink-0 transition-colors",
-                                aiReport.color === 'rose' ? "bg-rose-500/20 text-rose-400" :
-                                    aiReport.color === 'amber' ? "bg-amber-500/20 text-amber-400" :
-                                        aiReport.color === 'blue' ? "bg-blue-500/20 text-blue-400" :
-                                            "bg-emerald-500/20 text-emerald-400"
+                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-white/5 transition-colors duration-300",
+                                aiReport.color === 'rose' ? "border-rose-500/40 text-rose-500 shadow-[0_0_15px_-3px_rgba(244,63,94,0.3)]" :
+                                    aiReport.color === 'amber' ? "border-amber-500/40 text-amber-500 shadow-[0_0_15px_-3px_rgba(245,158,11,0.3)]" :
+                                        aiReport.color === 'blue' ? "border-blue-500/40 text-blue-500 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]" :
+                                            "border-emerald-500/40 text-emerald-500 shadow-[0_0_15px_-3px_rgba(16,185,129,0.3)]"
                             )}>
-                                <Activity size={20} className={cn(aiReport.color === 'rose' && "animate-pulse")} />
+                                <Activity size={20} />
                             </div>
-                            <div>
-                                <h4 className={cn("text-sm font-bold mb-1",
+
+                            <div className="flex flex-col">
+                                <h4 className={cn("text-sm font-bold transition-colors",
                                     aiReport.color === 'rose' ? "text-rose-400" :
-                                        aiReport.color === 'amber' ? "text-amber-400" : "text-white"
+                                        aiReport.color === 'amber' ? "text-amber-400" :
+                                            aiReport.color === 'blue' ? "text-blue-400" :
+                                                "text-white"
                                 )}>
                                     {featuredInsight?.title || aiReport.mainHeadline}
                                 </h4>
-                                <p className="text-xs font-medium text-slate-300 leading-relaxed line-clamp-2">
-                                    "{featuredInsight?.text || "Analizando flujo de datos en tiempo real..."}"
+                                <p className="text-xs text-slate-400 font-medium leading-relaxed line-clamp-2 mt-1">
+                                    "{featuredInsight?.text || "Analizando operaciones..."}"
                                 </p>
                             </div>
                         </div>
 
-                        {/* EL BOTÓN AHORA ABRE EL MODAL */}
-                        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-
-                            {/* Status Badge (Reemplazó al Health Score) */}
-                            <div className="flex items-center gap-2">
-                                <div className={cn("w-2 h-2 rounded-full",
-                                    aiReport.color === 'rose' ? "bg-rose-500 animate-pulse" :
+                        {/* FOOTER: Badge y Botón Sólido */}
+                        <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between gap-3">
+                            {/* Badge de Estado */}
+                            <div className={cn(
+                                "px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider border flex items-center gap-2 transition-colors shrink-0",
+                                aiReport.color === 'rose' ? "bg-rose-500/10 border-rose-500/20 text-rose-400" :
+                                    aiReport.color === 'amber' ? "bg-amber-500/10 border-amber-500/20 text-amber-400" :
+                                        aiReport.color === 'blue' ? "bg-blue-500/10 border-blue-500/20 text-blue-400" :
+                                            "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                            )}>
+                                <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse",
+                                    aiReport.color === 'rose' ? "bg-rose-500" :
                                         aiReport.color === 'amber' ? "bg-amber-500" :
-                                            aiReport.color === 'blue' ? "bg-blue-500" : "bg-emerald-500"
+                                            aiReport.color === 'blue' ? "bg-blue-500" :
+                                                "bg-emerald-500"
                                 )} />
-                                <span className={cn("text-[10px] font-bold uppercase tracking-wider",
-                                    aiReport.color === 'rose' ? "text-rose-400" :
-                                        aiReport.color === 'amber' ? "text-amber-400" :
-                                            aiReport.color === 'blue' ? "text-blue-400" : "text-emerald-400"
-                                )}>
-                                    {aiReport.label}
-                                </span>
+                                {aiReport.label}
                             </div>
 
+                            {/* BOTÓN REAL: Visible y con fondo */}
                             <button
                                 onClick={() => setInsightModalOpen(true)}
-                                className={cn(
-                                    "text-xs font-bold hover:text-white transition-colors flex items-center gap-1 cursor-pointer",
-                                    aiReport.color === 'rose' ? "text-rose-400" :
-                                        aiReport.color === 'amber' ? "text-amber-400" :
-                                            "text-slate-400"
-                                )}
+                                className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white text-xs font-bold py-2 px-3 rounded-lg transition-all active:scale-95 flex items-center justify-center"
                             >
-                                Ver Diagnóstico &rarr;
+                                Ver Diagnóstico
                             </button>
                         </div>
                     </div>
-
-                    {/* Fondo Alerta (Solo si es crítico) */}
-                    {aiReport.color === 'rose' && (
-                        <div className="absolute inset-0 bg-rose-500/5 z-0 pointer-events-none" />
-                    )}
                 </BentoCard>
 
                 {/* 4. TIPOS DE MESA */}

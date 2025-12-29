@@ -4,28 +4,89 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --- RESET GLOBAL PARA ELIMINAR OUTLINES --- */
+/* Esto mata el borde azul/blanco en TODOS los botones e inputs al hacer click */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  /* A veces el focus es un box-shadow */
+}
+
+/* Opcional: Si quieres que solo se vea algo al navegar con TAB (Accesibilidad), 
+   descomenta esto. Pero si quieres "cero bordes" siempre, déjalo comentado. */
+/* *:focus-visible {
+   outline: 2px solid var(--primary); 
+   outline-offset: 2px;
+} */
+
+
 :root {
   /* VANTRA DARK THEME */
   --background: 222 47% 11%;
   /* Slate 900 Profundo */
   --foreground: 210 40% 98%;
+
   --primary: 217 91% 60%;
-  /* Azul Eléctrico */
+  /* Azul Eléctrico por defecto */
   --primary-foreground: 222 47% 11%;
+
   --card: 217 33% 17%;
   --card-foreground: 210 40% 98%;
+
   --muted: 217 33% 17%;
   --muted-foreground: 215 20% 65%;
+
   --border: 217 33% 20%;
 }
 
 body {
-  @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30;
-  /* Fondo Premium Fijo */
+  @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30 selection:text-white;
+
+  /* Fondo Premium Fijo (Mejorado para que cubra todo siempre) */
+  background-color: hsl(222, 47%, 11%);
   background-image:
-    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.2) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0.2) 0, transparent 50%);
+    radial-gradient(circle at 0% 0%, rgba(20, 20, 30, 1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    /* Luz azul sutil arriba */
+    radial-gradient(circle at 100% 0%, rgba(244, 63, 94, 0.1) 0%, transparent 50%);
+  /* Luz rosa sutil derecha */
   background-attachment: fixed;
+  background-size: cover;
   min-height: 100vh;
+}
+
+/* --- SCROLLBARS PERSONALIZADOS (Estilo "Dark Mode") --- */
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Clase de utilidad para ocultar scrollbar pero permitir scroll */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Search, Plus, ChevronLeft, ChevronRight, History, CalendarDays } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { useReservations } from "../context/ReservationsContext"; // <--- CONEXIÓN AL CEREBRO
+import { useReservations } from "../context/ReservationsContext";
 
 // Componentes Modulares
 import ReservationListView from '../components/reservations/ReservationListView';
@@ -22,22 +22,17 @@ const ReservationsPage = () => {
     const { theme } = useTheme();
 
     // 1. EXTRAEMOS LA LOGICA GLOBAL DEL CONTEXTO
-    // Ya no usamos useState local para 'reservations', usamos el global
     const { reservations, addReservation, updateReservation, deleteReservation } = useReservations();
 
-    // --- ESTADOS LOCALES (Solo UI: filtros, modales, selección) ---
+    // --- ESTADOS LOCALES ---
     const [selectedId, setSelectedId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-    // Estado para saber si estamos editando (objeto) o creando (null)
     const [editingReservation, setEditingReservation] = useState(null);
-
     const [currentDate, setCurrentDate] = useState(getTodayString());
 
     // --- FILTRO Y ORDENAMIENTO ---
-    // Esto sigue siendo local porque depende de 'searchTerm' y 'currentDate' que son preferencias de vista
     const displayedReservations = useMemo(() => {
         return reservations
             .filter(r => {
@@ -51,7 +46,7 @@ const ReservationsPage = () => {
     // --- MANEJADORES UI ---
     const handleCardClick = (id) => setSelectedId(prev => prev === id ? null : id);
 
-    // Navegación rápida de fechas
+    // Navegación rápida
     const changeDay = (days) => {
         const date = new Date(currentDate + 'T00:00:00');
         date.setDate(date.getDate() + days);
@@ -60,25 +55,21 @@ const ReservationsPage = () => {
 
     // --- GESTIÓN DE MODALES ---
     const openCreateModal = () => {
-        setEditingReservation(null); // Null = "Modo Crear"
+        setEditingReservation(null);
         setIsModalOpen(true);
     };
 
     const openEditModal = (res) => {
-        setEditingReservation(res); // Objeto = "Modo Editar"
+        setEditingReservation(res);
         setIsModalOpen(true);
     };
 
-    // --- ACCIONES CRUD (Conectadas al Contexto) ---
+    // --- ACCIONES CRUD ---
     const handleFormSubmit = (formData) => {
-        // Formatear notas a array de tags
         const tags = formData.notes ? [formData.notes] : [];
-
         if (editingReservation) {
-            // EDITAR: Llamamos a la función global de actualizar
             updateReservation(editingReservation.id, { ...formData, tags });
         } else {
-            // CREAR: Llamamos a la función global de crear
             addReservation({ ...formData, tags });
         }
         setIsModalOpen(false);
@@ -86,14 +77,13 @@ const ReservationsPage = () => {
 
     const handleDelete = (id) => {
         if (window.confirm("¿Estás seguro de eliminar esta reserva?")) {
-            deleteReservation(id); // Acción Global
+            deleteReservation(id);
             setSelectedId(null);
         }
     };
 
-    // Wrapper para cuando cambiamos status desde la tarjeta (ej: "Llegó ya")
     const handleUpdateStatus = (id, newData) => {
-        updateReservation(id, newData); // Acción Global
+        updateReservation(id, newData);
         setSelectedId(null);
     };
 
@@ -103,34 +93,66 @@ const ReservationsPage = () => {
             {/* HEADER DE CONTROL */}
             <div className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
 
-                {/* NAVEGACIÓN FECHAS (Izquierda) */}
-                <div className="flex items-center gap-3 bg-[#0F0F10] border border-white/10 p-1 rounded-xl w-full md:w-auto h-11 shadow-sm">
-                    <button onClick={() => changeDay(-1)} className="h-full px-3 hover:bg-white/5 text-slate-400 hover:text-white transition-colors border-r border-white/5">
+                {/* NAVEGACIÓN FECHAS (Rediseñado: Fijo, Separadores y Animado) */}
+                <div className="flex items-center bg-[#0F0F10] border border-white/10 p-1 rounded-xl shadow-sm h-11 select-none">
+
+                    {/* Flecha Izquierda */}
+                    <button
+                        onClick={() => changeDay(-1)}
+                        className="w-9 h-full rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95 outline-none focus:outline-none focus:ring-0"
+                    >
                         <ChevronLeft size={18} />
                     </button>
 
+                    {/* Separador Vertical */}
+                    <div className="w-[1px] h-4 bg-white/10 mx-1" />
+
+                    {/* Visor de Fecha (ANCHO FIJO para evitar temblequeo) */}
                     <div
-                        className="relative flex-1 md:flex-none flex items-center justify-center px-4 hover:bg-white/5 transition-colors cursor-pointer h-full"
+                        className="w-48 h-full rounded-lg flex items-center justify-center gap-2 hover:bg-white/5 transition-all cursor-pointer active:scale-95"
                         onClick={() => setIsCalendarOpen(true)}
                     >
-                        <div className="flex items-center gap-2 text-white font-bold text-sm capitalize whitespace-nowrap">
-                            <CalendarDays size={16} className="text-primary" />
+                        <CalendarDays size={16} className="text-primary" />
+                        <span className="text-sm font-bold text-white capitalize whitespace-nowrap">
                             {formatDateHeader(currentDate)}
-                        </div>
+                        </span>
                     </div>
 
-                    <button onClick={() => changeDay(1)} className="h-full px-3 hover:bg-white/5 text-slate-400 hover:text-white transition-colors border-l border-white/5">
+                    {/* Separador Vertical */}
+                    <div className="w-[1px] h-4 bg-white/10 mx-1" />
+
+                    {/* Flecha Derecha */}
+                    <button
+                        onClick={() => changeDay(1)}
+                        className="w-9 h-full rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95 outline-none focus:outline-none focus:ring-0"
+                    >
                         <ChevronRight size={18} />
                     </button>
 
-                    {/* Botón "Hoy" si no estamos en hoy */}
-                    {currentDate !== getTodayString() && (
-                        <div className="border-l border-white/10 pl-1">
-                            <button onClick={() => setCurrentDate(getTodayString())} className="h-full px-3 hover:bg-white/5 text-primary text-xs font-bold uppercase transition-colors flex items-center gap-1">
-                                <History size={14} /> Hoy
-                            </button>
-                        </div>
-                    )}
+                    {/* Botón "Hoy" (ANIMACIÓN PRO) */}
+                    <AnimatePresence>
+                        {currentDate !== getTodayString() && (
+                            <motion.div
+                                initial={{ width: 0, opacity: 0 }}
+                                animate={{ width: 'auto', opacity: 1 }}
+                                exit={{ width: 0, opacity: 0 }}
+                                // SPRING: Rebote suave, mucho más premium
+                                transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+                                className="overflow-hidden flex items-center h-full" // <--- h-full IMPORTANTE
+                            >
+                                {/* Separador extra que aparece con el botón */}
+                                <div className="w-[1px] h-4 bg-white/10 mx-1 shrink-0" />
+
+                                <button
+                                    onClick={() => setCurrentDate(getTodayString())}
+                                    // CLASES CLAVE: h-full, outline-none, focus:ring-0
+                                    className="h-full px-3 rounded-lg text-primary hover:bg-primary/10 text-xs font-bold uppercase transition-colors flex items-center gap-1 whitespace-nowrap outline-none focus:outline-none focus:ring-0 active:scale-95"
+                                >
+                                    <History size={14} /> Hoy
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* BUSCADOR Y BOTÓN NUEVA (Derecha) */}
@@ -144,12 +166,12 @@ const ReservationsPage = () => {
                             placeholder="Buscar cliente..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-full bg-[#0F0F10] border border-white/10 rounded-xl pl-9 pr-3 text-sm text-white focus:border-primary/50 outline-none transition-all shadow-sm placeholder:text-slate-600"
+                            className="w-full h-full bg-[#0F0F10] border border-white/10 rounded-xl pl-9 pr-3 text-sm text-white focus:border-primary/50 outline-none transition-all shadow-sm placeholder:text-slate-600 focus:ring-0"
                         />
                     </div>
                     <button
                         onClick={openCreateModal}
-                        className="h-full px-5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2 whitespace-nowrap"
+                        className="h-full px-5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2 whitespace-nowrap outline-none focus:outline-none focus:ring-0"
                     >
                         <Plus size={18} strokeWidth={3} />
                         <span className="hidden md:inline">Nueva</span>
@@ -157,9 +179,8 @@ const ReservationsPage = () => {
                 </div>
             </div>
 
-            {/* LISTA DE RESERVAS (Área Principal) */}
+            {/* LISTA DE RESERVAS */}
             <div className="flex-1 min-h-0 bg-[#0F0F10] border border-white/5 rounded-2xl shadow-2xl flex flex-col relative overflow-hidden">
-                {/* Efecto de fondo (Glow) */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
                 {displayedReservations.length > 0 ? (
@@ -172,7 +193,6 @@ const ReservationsPage = () => {
                         onEdit={openEditModal}
                     />
                 ) : (
-                    // Estado vacío (Empty State)
                     <div className="flex flex-col items-center justify-center h-full text-slate-500 opacity-60 min-h-[400px]">
                         <CalendarDays size={48} strokeWidth={1} className="mb-4 text-slate-600" />
                         <p className="text-lg font-medium text-slate-400">Día libre</p>
@@ -181,20 +201,16 @@ const ReservationsPage = () => {
                 )}
             </div>
 
-            {/* MODALES FLOTANTES */}
-            <AnimatePresence>
-                {isCalendarOpen && (
-                    <CustomCalendar
-                        isOpen={isCalendarOpen}
-                        onClose={() => setIsCalendarOpen(false)}
-                        selectedDate={currentDate}
-                        onSelect={setCurrentDate}
-                        themeColor={theme.color}
-                    />
-                )}
-            </AnimatePresence>
+            {/* MODALES */}
+            <CustomCalendar
+                isOpen={isCalendarOpen}
+                onClose={() => setIsCalendarOpen(false)}
+                selectedDate={currentDate}
+                onSelect={setCurrentDate}
+                themeColor={theme.color}
+            />
 
-            {/* El Modal de Formulario ahora es un componente limpio */}
+            {/* El Modal de Formulario */}
             <ReservationFormModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

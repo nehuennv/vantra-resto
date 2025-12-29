@@ -15,7 +15,8 @@ const BentoCard = ({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            // CAMBIO: Se eliminó "y: -4" para que la tarjeta no se mueva hacia arriba.
+            whileHover={{ transition: { duration: 0.2 } }}
             transition={{ duration: 0.5, delay: delay, ease: "easeOut" }}
             className={cn(
                 "relative flex flex-col overflow-hidden rounded-3xl border border-white/5 bg-[#0F0F10] p-6 shadow-2xl backdrop-blur-sm",
