@@ -1,15 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, Plus, ChevronLeft, ChevronRight, History, CalendarDays } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, History, CalendarDays } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+// 1. IMPORTAMOS EL CONTEXTO GLOBAL
 import { useReservations } from "../context/ReservationsContext";
 
-// Componentes Modulares
 import ReservationListView from '../components/reservations/ReservationListView';
 import CustomCalendar from '../components/ui/CustomCalendar';
-import ReservationFormModal from '../components/reservations/ReservationFormModal';
 
-// Utilidades
 const getTodayString = () => new Date().toISOString().split('T')[0];
 
 const formatDateHeader = (dateString) => {
@@ -21,58 +20,42 @@ const formatDateHeader = (dateString) => {
 const ReservationsPage = () => {
     const { theme } = useTheme();
 
-    // 1. EXTRAEMOS LA LOGICA GLOBAL DEL CONTEXTO
-    const { reservations, addReservation, updateReservation, deleteReservation } = useReservations();
+    // 2. USAMOS LA FECHA GLOBAL (selectedDate) EN LUGAR DE LA LOCAL
+    const {
+        reservations,
+        updateReservation,
+        deleteReservation,
+        selectedDate,      // <--- LA FECHA DEL CEREBRO
+        setSelectedDate    // <--- EL CONTROL DEL CEREBRO
+    } = useReservations();
 
-    // --- ESTADOS LOCALES ---
+    const { openModal } = useOutletContext();
+
+    // --- ESTADOS LOCALES (Solo UI) ---
     const [selectedId, setSelectedId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [editingReservation, setEditingReservation] = useState(null);
-    const [currentDate, setCurrentDate] = useState(getTodayString());
+    // NOTA: Borramos const [currentDate, setCurrentDate]... ya no hace falta.
 
-    // --- FILTRO Y ORDENAMIENTO ---
+    // --- FILTRO Y ORDENAMIENTO (Usando selectedDate global) ---
     const displayedReservations = useMemo(() => {
         return reservations
             .filter(r => {
-                const matchDate = r.date === currentDate;
+                const matchDate = r.date === selectedDate;
                 const matchSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase());
                 return matchDate && matchSearch;
             })
             .sort((a, b) => a.time.localeCompare(b.time));
-    }, [reservations, currentDate, searchTerm]);
+    }, [reservations, selectedDate, searchTerm]);
 
     // --- MANEJADORES UI ---
     const handleCardClick = (id) => setSelectedId(prev => prev === id ? null : id);
 
-    // Navegación rápida
     const changeDay = (days) => {
-        const date = new Date(currentDate + 'T00:00:00');
+        const date = new Date(selectedDate + 'T00:00:00');
         date.setDate(date.getDate() + days);
-        setCurrentDate(date.toISOString().split('T')[0]);
-    };
-
-    // --- GESTIÓN DE MODALES ---
-    const openCreateModal = () => {
-        setEditingReservation(null);
-        setIsModalOpen(true);
-    };
-
-    const openEditModal = (res) => {
-        setEditingReservation(res);
-        setIsModalOpen(true);
-    };
-
-    // --- ACCIONES CRUD ---
-    const handleFormSubmit = (formData) => {
-        const tags = formData.notes ? [formData.notes] : [];
-        if (editingReservation) {
-            updateReservation(editingReservation.id, { ...formData, tags });
-        } else {
-            addReservation({ ...formData, tags });
-        }
-        setIsModalOpen(false);
+        // 3. ACTUALIZAMOS EL CONTEXTO GLOBAL
+        setSelectedDate(date.toISOString().split('T')[0]);
     };
 
     const handleDelete = (id) => {
@@ -87,16 +70,18 @@ const ReservationsPage = () => {
         setSelectedId(null);
     };
 
+    const handleEdit = (res) => {
+        openModal(res);
+    };
+
     return (
         <div className="h-full flex flex-col space-y-4 relative pb-2 overflow-hidden">
 
             {/* HEADER DE CONTROL */}
             <div className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
 
-                {/* NAVEGACIÓN FECHAS (Rediseñado: Fijo, Separadores y Animado) */}
+                {/* NAVEGACIÓN FECHAS */}
                 <div className="flex items-center bg-[#0F0F10] border border-white/10 p-1 rounded-xl shadow-sm h-11 select-none">
-
-                    {/* Flecha Izquierda */}
                     <button
                         onClick={() => changeDay(-1)}
                         className="w-9 h-full rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95 outline-none focus:outline-none focus:ring-0"
@@ -104,24 +89,20 @@ const ReservationsPage = () => {
                         <ChevronLeft size={18} />
                     </button>
 
-                    {/* Separador Vertical */}
                     <div className="w-[1px] h-4 bg-white/10 mx-1" />
 
-                    {/* Visor de Fecha (ANCHO FIJO para evitar temblequeo) */}
                     <div
                         className="w-48 h-full rounded-lg flex items-center justify-center gap-2 hover:bg-white/5 transition-all cursor-pointer active:scale-95"
                         onClick={() => setIsCalendarOpen(true)}
                     >
                         <CalendarDays size={16} className="text-primary" />
                         <span className="text-sm font-bold text-white capitalize whitespace-nowrap">
-                            {formatDateHeader(currentDate)}
+                            {formatDateHeader(selectedDate)}
                         </span>
                     </div>
 
-                    {/* Separador Vertical */}
                     <div className="w-[1px] h-4 bg-white/10 mx-1" />
 
-                    {/* Flecha Derecha */}
                     <button
                         onClick={() => changeDay(1)}
                         className="w-9 h-full rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95 outline-none focus:outline-none focus:ring-0"
@@ -129,23 +110,18 @@ const ReservationsPage = () => {
                         <ChevronRight size={18} />
                     </button>
 
-                    {/* Botón "Hoy" (ANIMACIÓN PRO) */}
                     <AnimatePresence>
-                        {currentDate !== getTodayString() && (
+                        {selectedDate !== getTodayString() && (
                             <motion.div
                                 initial={{ width: 0, opacity: 0 }}
                                 animate={{ width: 'auto', opacity: 1 }}
                                 exit={{ width: 0, opacity: 0 }}
-                                // SPRING: Rebote suave, mucho más premium
                                 transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-                                className="overflow-hidden flex items-center h-full" // <--- h-full IMPORTANTE
+                                className="overflow-hidden flex items-center h-full"
                             >
-                                {/* Separador extra que aparece con el botón */}
                                 <div className="w-[1px] h-4 bg-white/10 mx-1 shrink-0" />
-
                                 <button
-                                    onClick={() => setCurrentDate(getTodayString())}
-                                    // CLASES CLAVE: h-full, outline-none, focus:ring-0
+                                    onClick={() => setSelectedDate(getTodayString())}
                                     className="h-full px-3 rounded-lg text-primary hover:bg-primary/10 text-xs font-bold uppercase transition-colors flex items-center gap-1 whitespace-nowrap outline-none focus:outline-none focus:ring-0 active:scale-95"
                                 >
                                     <History size={14} /> Hoy
@@ -155,7 +131,7 @@ const ReservationsPage = () => {
                     </AnimatePresence>
                 </div>
 
-                {/* BUSCADOR Y BOTÓN NUEVA (Derecha) */}
+                {/* BUSCADOR */}
                 <div className="flex items-center gap-3 w-full md:w-auto h-11">
                     <div className="relative flex-1 md:w-64 h-full">
                         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -169,13 +145,6 @@ const ReservationsPage = () => {
                             className="w-full h-full bg-[#0F0F10] border border-white/10 rounded-xl pl-9 pr-3 text-sm text-white focus:border-primary/50 outline-none transition-all shadow-sm placeholder:text-slate-600 focus:ring-0"
                         />
                     </div>
-                    <button
-                        onClick={openCreateModal}
-                        className="h-full px-5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2 whitespace-nowrap outline-none focus:outline-none focus:ring-0"
-                    >
-                        <Plus size={18} strokeWidth={3} />
-                        <span className="hidden md:inline">Nueva</span>
-                    </button>
                 </div>
             </div>
 
@@ -190,32 +159,24 @@ const ReservationsPage = () => {
                         onSelect={handleCardClick}
                         onUpdate={handleUpdateStatus}
                         onDelete={handleDelete}
-                        onEdit={openEditModal}
+                        onEdit={handleEdit}
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-slate-500 opacity-60 min-h-[400px]">
                         <CalendarDays size={48} strokeWidth={1} className="mb-4 text-slate-600" />
                         <p className="text-lg font-medium text-slate-400">Día libre</p>
-                        <p className="text-sm">Sin reservas para el <span className="capitalize">{formatDateHeader(currentDate)}</span></p>
+                        <p className="text-sm">Sin reservas para el <span className="capitalize">{formatDateHeader(selectedDate)}</span></p>
                     </div>
                 )}
             </div>
 
-            {/* MODALES */}
+            {/* CALENDARIO MODAL (Sincronizado con Global) */}
             <CustomCalendar
                 isOpen={isCalendarOpen}
                 onClose={() => setIsCalendarOpen(false)}
-                selectedDate={currentDate}
-                onSelect={setCurrentDate}
+                selectedDate={selectedDate}
+                onSelect={setSelectedDate}
                 themeColor={theme.color}
-            />
-
-            {/* El Modal de Formulario */}
-            <ReservationFormModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSubmit={handleFormSubmit}
-                initialData={editingReservation}
             />
         </div>
     );

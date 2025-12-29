@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Moon, Monitor, Type, Save, BellRing } from "lucide-react";
+import { X, Moon, Monitor, Type, Save, BellRing, Check } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTheme } from "../context/ThemeContext";
 
@@ -8,52 +8,68 @@ const SettingToggle = ({ icon: Icon, title, description, active, onToggle }) => 
     <div
         onClick={onToggle}
         className={cn(
-            "flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all duration-200 group select-none",
+            "relative flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all duration-300 group select-none overflow-hidden",
             active
-                ? "bg-white/5 border-primary shadow-[0_0_15px_-5px_rgba(0,0,0,0.5)] shadow-primary/20"
-                : "bg-white/5 border-white-alpha hover:bg-white/10"
+                ? "bg-primary/5 border-primary/50 shadow-[0_0_20px_-10px_rgba(var(--primary),0.3)]"
+                : "bg-[#18181b] border-white/5 hover:bg-white/5 hover:border-white/10"
         )}
     >
-        <div className="flex items-start gap-4">
+        {!active && (
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        )}
+
+        <div className="relative z-10 flex items-start gap-4">
             <div className={cn(
-                "p-2 rounded-lg transition-colors",
-                active ? "bg-transparent text-primary" : "bg-transparent text-slate-400 group-hover:text-slate-200"
+                "p-2.5 rounded-xl transition-colors duration-300",
+                active ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-white/5 text-slate-400 group-hover:text-white"
             )}>
-                <Icon size={20} strokeWidth={active ? 2 : 1.5} />
+                <Icon size={18} strokeWidth={active ? 2.5 : 1.5} />
             </div>
             <div>
-                <h4 className={cn("font-medium text-sm transition-colors", active ? "text-white" : "text-slate-300")}>
+                <h4 className={cn("font-bold text-sm transition-colors font-jakarta", active ? "text-white" : "text-slate-300 group-hover:text-white")}>
                     {title}
                 </h4>
-                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{description}</p>
+                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed font-medium">{description}</p>
             </div>
         </div>
 
+        {/* MANTENEMOS TU LÓGICA DE JUSTIFY QUE YA ESTABA BIEN */}
         <div className={cn(
-            "w-10 h-6 rounded-full relative transition-colors duration-300",
-            active ? "bg-primary" : "bg-slate-700"
+            "w-12 h-7 rounded-full relative transition-colors duration-300 flex items-center px-1",
+            active ? "bg-primary justify-end" : "bg-slate-800 border border-white/5 justify-start"
         )}>
-            <div className={cn(
-                "absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300",
-                active ? "left-5" : "left-1"
-            )} />
+            <motion.div
+                layout
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className={cn(
+                    "w-5 h-5 rounded-full shadow-sm",
+                    active ? "bg-white" : "bg-slate-500"
+                )}
+            />
         </div>
     </div>
 );
 
 const SettingsPanel = ({ isOpen, onClose }) => {
-    // Importamos soundEnabled y toggleSound del contexto
-    const { soundEnabled, toggleSound } = useTheme();
-
-    const [fontSize, setFontSize] = useState(100);
-    const [highContrast, setHighContrast] = useState(false);
-
-    useEffect(() => {
-        document.documentElement.style.fontSize = `${fontSize}%`;
-    }, [fontSize]);
+    // 1. AQUÍ AGREGAMOS SOLO LO QUE FALTA (themeMode, toggleTheme)
+    const {
+        soundEnabled,
+        toggleSound,
+        fontSize,
+        setFontSize,
+        highContrast,
+        setHighContrast,
+        themeMode,   // <--- NUEVO
+        toggleTheme  // <--- NUEVO
+    } = useTheme();
 
     const adjustFont = (delta) => {
-        setFontSize(prev => Math.min(Math.max(prev + delta, 85), 115));
+        setFontSize(prev => {
+            const newValue = prev + delta;
+            if (newValue > 115) return 115;
+            if (newValue < 85) return 85;
+            return newValue;
+        });
     };
 
     return (
@@ -72,109 +88,104 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                         initial={{ x: "100%" }}
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-y-0 right-0 w-[400px] bg-sidebar border-l border-white-alpha shadow-2xl z-[70] flex flex-col"
+                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                        className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[#0A0A0B] border-l border-white/10 shadow-2xl z-[70] flex flex-col"
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-white-alpha flex items-center justify-between bg-white/[0.02]">
+                        <div className="px-8 py-6 border-b border-white/10 flex items-center justify-between bg-[#0F0F10]">
                             <div>
-                                <h2 className="text-xl font-bold text-foreground font-jakarta tracking-tight">Preferencias</h2>
-                                <p className="text-sm text-slate-400">Ajustes visuales del sistema.</p>
+                                <h2 className="text-xl font-bold text-white font-jakarta tracking-tight">Preferencias</h2>
+                                <p className="text-xs font-medium text-slate-500 mt-1 uppercase tracking-wider">Configuración del Sistema</p>
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors outline-none"
-                            >
+                            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-90 outline-none">
                                 <X size={20} />
                             </button>
                         </div>
 
                         {/* Body */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
 
-                            {/* SECCIÓN 1: ACCESIBILIDAD */}
+                            {/* SECCIÓN TIPOGRAFÍA (Intacta) */}
                             <section>
-                                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Visualización</h3>
+                                <div className="flex items-center gap-2 mb-4 opacity-80">
+                                    <Type size={14} className="text-primary" />
+                                    <h3 className="text-xs font-bold text-white uppercase tracking-widest">Tipografía</h3>
+                                </div>
 
-                                <div className="space-y-3"> {/* Espaciado para el grupo visual */}
-                                    <div className="bg-white/5 border border-white-alpha rounded-xl p-4">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="flex items-center gap-3">
-                                                <Type size={18} className="text-slate-400" />
-                                                <span className="text-sm font-medium text-slate-200">Tamaño de Texto</span>
-                                            </div>
-                                            <span className="text-xs font-mono font-bold text-primary border border-primary/30 px-2 py-0.5 rounded">
-                                                {fontSize}%
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 bg-black/20 rounded-lg p-1 border border-white/5">
-                                            <button
-                                                onClick={() => adjustFont(-5)}
-                                                className="flex-1 h-8 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 rounded-md font-bold text-xs transition-colors active:scale-95"
-                                            >
-                                                A-
-                                            </button>
-                                            <div className="w-px h-4 bg-white/10"></div>
-                                            <button
-                                                onClick={() => setFontSize(100)}
-                                                className="flex-1 h-8 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 rounded-md text-[10px] uppercase font-bold transition-colors"
-                                            >
-                                                Reset
-                                            </button>
-                                            <div className="w-px h-4 bg-white/10"></div>
-                                            <button
-                                                onClick={() => adjustFont(5)}
-                                                className="flex-1 h-8 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 rounded-md font-bold text-xs transition-colors active:scale-95"
-                                            >
-                                                A+
-                                            </button>
-                                        </div>
+                                <div className="bg-[#18181b] border border-white/5 rounded-2xl p-5 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-slate-300">Escala de Texto</span>
+                                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md border border-primary/20">
+                                            {fontSize}%
+                                        </span>
                                     </div>
 
+                                    <div className="flex items-center bg-black/40 rounded-xl p-1 border border-white/5 h-12 relative">
+                                        <button onClick={() => adjustFont(-5)} disabled={fontSize <= 85} className="flex-1 h-full flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 transition-colors rounded-lg active:bg-white/5">
+                                            <span className="text-xs font-bold">A-</span>
+                                        </button>
+                                        <div className="w-px h-4 bg-white/10" />
+                                        <button onClick={() => setFontSize(100)} className="flex-[2] h-full flex items-center justify-center gap-2 text-slate-300 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">
+                                            {fontSize === 100 && <Check size={12} className="text-primary" />}
+                                            Predeterminado
+                                        </button>
+                                        <div className="w-px h-4 bg-white/10" />
+                                        <button onClick={() => adjustFont(5)} disabled={fontSize >= 115} className="flex-1 h-full flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 transition-colors rounded-lg active:bg-white/5">
+                                            <span className="text-base font-bold">A+</span>
+                                        </button>
+                                    </div>
+                                    <div className="h-px w-full bg-white/5 my-2" />
+                                    <div className="flex items-center justify-between px-1">
+                                        <span className="text-[10px] text-slate-500 font-medium">Compacto</span>
+                                        <span className="text-[10px] text-slate-500 font-medium">Amplio</span>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* SECCIÓN INTERFAZ */}
+                            <section>
+                                <div className="flex items-center gap-2 mb-4 opacity-80">
+                                    <Monitor size={14} className="text-primary" />
+                                    <h3 className="text-xs font-bold text-white uppercase tracking-widest">Interfaz</h3>
+                                </div>
+
+                                <div className="space-y-4">
                                     <SettingToggle
                                         icon={Monitor}
-                                        title="Modo Alto Contraste"
-                                        description="Aumenta la definición de bordes."
+                                        title="Alto Contraste"
+                                        description="Resalta bordes y separadores."
                                         active={highContrast}
                                         onToggle={() => setHighContrast(!highContrast)}
                                     />
-                                </div>
-                            </section>
 
-                            {/* SECCIÓN 2: SISTEMA (AQUI ESTABA EL ERROR DE GAP) */}
-                            <section>
-                                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Notificaciones</h3>
-
-                                {/* FIX: Agregado space-y-3 para separar los items */}
-                                <div className="space-y-3">
                                     <SettingToggle
                                         icon={BellRing}
-                                        title="Sonidos de Alerta"
-                                        description="Reproducir sonido al recibir nuevas reservas."
-                                        active={soundEnabled} // Estado real del contexto
-                                        onToggle={toggleSound} // Función real
+                                        title="Alertas Sonoras"
+                                        description="Feedback auditivo en acciones."
+                                        active={soundEnabled}
+                                        onToggle={toggleSound}
                                     />
+
+                                    {/* 2. AQUÍ CONECTAMOS EL TOGGLE REAL */}
                                     <SettingToggle
                                         icon={Moon}
-                                        title="Modo Oscuro Forzado"
-                                        description="Optimizado para bajo consumo de luz."
-                                        active={true}
-                                        onToggle={() => { }}
+                                        title="Modo Oscuro"
+                                        description="Optimizado para ambientes nocturnos."
+                                        active={themeMode === 'dark'} // <--- AHORA LEE LA VERDAD
+                                        onToggle={toggleTheme}        // <--- AHORA EJECUTA LA ACCIÓN
                                     />
                                 </div>
                             </section>
-
                         </div>
 
-                        {/* Footer */}
-                        <div className="p-6 border-t border-white-alpha bg-white/[0.02]">
+                        {/* Footer (Intacto) */}
+                        <div className="p-6 border-t border-white/10 bg-[#0F0F10]">
                             <button
                                 onClick={onClose}
-                                className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-95"
+                                className="w-full py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-transform active:scale-[0.98] outline-none"
                             >
-                                <Save size={18} />
-                                Guardar Preferencias
+                                <Save size={18} strokeWidth={2.5} />
+                                <span className="tracking-wide text-sm">Cerrar</span>
                             </button>
                         </div>
                     </motion.div>

@@ -12,18 +12,23 @@ export default {
         current: 'currentColor',
         extend: {
             colors: {
-                background: "hsl(var(--background))", // Ahora es dinámica
-                sidebar: "hsl(var(--sidebar))",       // Nueva variable dinámica
-                "white-alpha": "hsl(var(--border-color))",
-                foreground: "hsl(var(--foreground))",
+                // --- VARIABLES DINÁMICAS ---
+                background: "hsl(var(--background) / <alpha-value>)",
+                sidebar: "hsl(var(--sidebar) / <alpha-value>)",
+                foreground: "hsl(var(--foreground) / <alpha-value>)",
+
+                // --- EL FIX DEFINITIVO ---
+                // Mapeamos 'white-alpha' a la variable de borde.
+                // IMPORTANTE: Al usar ThemeContext nuevo, --border-color ya tiene el color exacto (Gris Oscuro o Gris Claro).
+                // No necesitamos que sea blanca con transparencia, necesitamos que sea del color del borde.
+                "white-alpha": "hsl(var(--border-color) / <alpha-value>)",
+
                 primary: {
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
+                    DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+                    foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
                 },
-                card: {
-                    DEFAULT: "hsl(var(--card))",
-                    foreground: "hsl(var(--card-foreground))",
-                },
+
+                // --- TREMOR COLORS (Originales) ---
                 tremor: {
                     brand: {
                         faint: colors.blue[50],
@@ -50,6 +55,7 @@ export default {
             },
             fontFamily: {
                 sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
             },
             boxShadow: {
                 'tremor-input': '0 1px 2px 0 rgb(0 0 0 / 0.05)',

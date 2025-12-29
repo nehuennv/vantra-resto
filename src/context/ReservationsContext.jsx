@@ -1,19 +1,22 @@
 import React, { createContext, useContext, useState } from 'react';
-import { initialReservations } from '../data/mockData'; // <--- IMPORTAMOS DATA LIMPIA
+import { initialReservations } from '../data/mockData';
 
 const ReservationsContext = createContext();
 
 export const ReservationsProvider = ({ children }) => {
-    // Usamos los datos importados
     const [reservations, setReservations] = useState(initialReservations);
+
+    // 1. NUEVO ESTADO GLOBAL: La fecha seleccionada
+    // Iniciamos con la fecha de hoy por defecto
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
     const addReservation = (data) => {
         const newId = Math.max(...reservations.map(r => r.id), 0) + 1;
-        const newRes = { 
-            id: newId, 
-            ...data, 
-            status: 'confirmed', 
-            createdAt: new Date().toISOString() 
+        const newRes = {
+            id: newId,
+            ...data,
+            status: 'confirmed',
+            createdAt: new Date().toISOString()
         };
         setReservations(prev => [...prev, newRes]);
     };
@@ -27,11 +30,14 @@ export const ReservationsProvider = ({ children }) => {
     };
 
     return (
-        <ReservationsContext.Provider value={{ 
-            reservations, 
-            addReservation, 
-            updateReservation, 
-            deleteReservation 
+        <ReservationsContext.Provider value={{
+            reservations,
+            addReservation,
+            updateReservation,
+            deleteReservation,
+            // 2. EXPONEMOS LA FECHA Y SU SETTER
+            selectedDate,
+            setSelectedDate
         }}>
             {children}
         </ReservationsContext.Provider>
