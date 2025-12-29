@@ -1,304 +1,469 @@
-import React from 'react';
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell, PieChart, Pie, Legend
+import React, { useState, useMemo } from 'react';
+import {
+    AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+    PieChart, Pie, Cell
 } from 'recharts';
-import { motion } from "framer-motion";
-import { 
-    MessageCircle, CalendarCheck, Users, Clock, 
-    ArrowUpRight, Zap, Target, Hourglass, Smartphone // <--- AQUÍ FALTABA ESTE, YA ESTÁ AGREGADO
+import { motion, AnimatePresence } from "framer-motion";
+import {
+    CalendarCheck, Users, Clock, Smartphone, UserCog, Percent,
+    Bot, Sun, Moon, Sparkles, TrendingUp, Activity
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTheme } from "../context/ThemeContext";
+import { useReservations } from "../context/ReservationsContext";
+import { clientConfig } from "../config/client";
+import { historicalAverages } from "../data/mockData";
+import { analyzeOperations } from "../lib/intelligence"; // <--- CEREBRO LÓGICO
+import BentoCard from "../components/dashboard/BentoCard"; // <--- COMPONENTE UI
+import IntelligenceModal from "../components/dashboard/IntelligenceModal"; // <--- MODAL NUEVO
 
-// --- DATOS MOCK (Simulados para la DEMO) ---
-const hourlyData = [
-  { time: '18:00', mensajes: 15, reservas: 3 },
-  { time: '19:00', mensajes: 45, reservas: 12 },
-  { time: '20:00', mensajes: 90, reservas: 28 }, // Pico
-  { time: '21:00', mensajes: 70, reservas: 22 },
-  { time: '22:00', mensajes: 30, reservas: 8 },
-  { time: '23:00', mensajes: 10, reservas: 2 },
-  { time: '00:00', mensajes: 5, reservas: 0 },
-];
-
-const sourceData = [
-  { name: 'WhatsApp', value: 82 },
-  { name: 'Instagram', value: 12 },
-  { name: 'Teléfono', value: 6 },
-];
-
-const groupSizeData = [
-  { name: 'Parejas (2)', value: 45 },
-  { name: 'Grupos (4-6)', value: 35 },
-  { name: 'Eventos (8+)', value: 20 },
-];
-
-const botLogs = [
-    { time: "21:12", text: "Nueva reserva: 4 pax (Mesa 8)", status: "highlight" },
-    { time: "21:10", text: "Menú enviado a +54911...", status: "success" },
-    { time: "21:05", text: "Consulta: '¿Tienen celíacos?'", status: "info" },
-    { time: "20:58", text: "Recordatorio enviado a Juan P.", status: "success" },
-    { time: "20:55", text: "Reserva cancelada (Liberada)", status: "error" },
-];
-
-// --- COMPONENTE BENTO BOX (Estructura de Cajitas) ---
-const BentoBox = ({ children, className, delay = 0, title, icon: Icon, valueHeader }) => {
-    return (
-        <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: delay }}
-            className={cn(
-                "bg-[#0F0F10] border border-white/5 rounded-2xl p-5 flex flex-col relative overflow-hidden group hover:border-white/10 transition-colors",
-                className
-            )}
-        >
-            {/* Header de la Caja */}
-            {(title || Icon) && (
-                <div className="flex items-center justify-between mb-4 z-10">
-                    <div className="flex items-center gap-2 text-slate-400">
-                        {Icon && <Icon size={16} className="text-slate-500" />}
-                        <span className="text-xs font-bold uppercase tracking-wider">{title}</span>
-                    </div>
-                    {valueHeader && (
-                        <span className="text-lg font-bold text-white tabular-nums">{valueHeader}</span>
-                    )}
+// --- TOOLTIP PREMIUM (Se mantiene aquí por ser específico de gráficos) ---
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-[#0F0F10]/90 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-2xl min-w-[180px] animate-in fade-in zoom-in-95 duration-200">
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <Clock size={12} /> {label} HS
+                </p>
+                <div className="space-y-2">
+                    {payload.map((entry, index) => (
+                        <div key={index} className="flex justify-between items-center text-sm">
+                            <div className="flex items-center gap-2">
+                                <div
+                                    className="w-2 h-2 rounded-full shadow-[0_0_8px_currentcolor]"
+                                    style={{ backgroundColor: entry.color, color: entry.color }}
+                                />
+                                <span className="text-slate-200 font-medium">{entry.name}</span>
+                            </div>
+                            <span className="font-bold text-white tabular-nums">
+                                {entry.value}
+                            </span>
+                        </div>
+                    ))}
                 </div>
-            )}
-            
-            {/* Contenido */}
-            <div className="flex-1 z-10 relative min-h-0 flex flex-col">{children}</div>
-        </motion.div>
-    );
+            </div>
+        );
+    }
+    return null;
 };
 
-// --- PÁGINA DASHBOARD ---
 const DashboardPage = () => {
     const { theme } = useTheme();
+    const { reservations } = useReservations();
     const themeColor = theme.color;
 
+    // --- ESTADOS ---
+    const [currentShift, setCurrentShift] = useState('dinner');
+    const [isInsightModalOpen, setInsightModalOpen] = useState(false); // <--- ESTADO DEL MODAL
+    const isSplitMode = clientConfig.businessLogic.serviceMode === 'split';
+
+    // --- LÓGICA DE FILTRADO (TURNOS) ---
+    const activeShiftConfig = clientConfig.businessLogic.shifts[currentShift];
+
+    const filteredReservations = useMemo(() => {
+        if (!isSplitMode) return reservations;
+
+        const startHour = parseInt(activeShiftConfig.start.split(':')[0]);
+        let endHour = parseInt(activeShiftConfig.end.split(':')[0]);
+        if (endHour < startHour) endHour += 24; // Ajuste madrugada
+
+        return reservations.filter(res => {
+            let h = parseInt(res.time.split(':')[0]);
+            if (h < 10) h += 24;
+            return h >= startHour && h <= endHour;
+        });
+    }, [reservations, currentShift, isSplitMode, activeShiftConfig]);
+
+    // --- KPI CALCULATIONS ---
+    const totalReservations = filteredReservations.length;
+    const totalPax = filteredReservations.reduce((acc, curr) => acc + curr.pax, 0);
+    const maxCap = clientConfig.businessLogic.maxCapacityPax;
+    const occupancyPercentage = Math.min(Math.round((totalPax / maxCap) * 100), 100);
+    const botCount = filteredReservations.filter(r => r.origin === 'whatsapp').length;
+
+    // --- PREPARACIÓN DE DATOS PARA GRÁFICOS E INTELIGENCIA ---
+
+    // Datos crudos de grupos (para la IA y Gráficos)
+    const groupStats = useMemo(() => {
+        let c = 0, g = 0, e = 0;
+        filteredReservations.forEach(r => {
+            if (r.pax <= 2) c++; else if (r.pax <= 6) g++; else e++;
+        });
+        return { couples: c, groups: g, events: e };
+    }, [filteredReservations]);
+
+    // VANTRA INTELLIGENCE (MOTOR DE REGLAS)
+    // Ahora obtenemos el reporte completo con status, healthScore y details
+    const aiReport = useMemo(() => {
+        return analyzeOperations({
+            occupancyPercentage,
+            botCount,
+            totalReservations,
+            totalPax,
+            groupData: groupStats
+        });
+    }, [occupancyPercentage, botCount, totalReservations, totalPax, groupStats]);
+
+    // Extraemos el insight más relevante para mostrar en la tarjeta pequeña
+    const featuredInsight = aiReport.details.find(d => d.type === 'critical')
+        || aiReport.details.find(d => d.type === 'warning')
+        || aiReport.details[0];
+
+    // GRÁFICO COMPARATIVO
+    const comparisonChartData = useMemo(() => {
+        const historyData = historicalAverages[currentShift] || [];
+        const todayMap = {};
+
+        filteredReservations.forEach(res => {
+            const h = res.time.split(':')[0] + ":00";
+            todayMap[h] = (todayMap[h] || 0) + res.pax;
+        });
+
+        return historyData.map(hItem => ({
+            time: hItem.time,
+            historical: hItem.personas,
+            actual: todayMap[hItem.time] || 0
+        }));
+    }, [filteredReservations, currentShift]);
+
+    // GRÁFICO DE GRUPOS (Visual)
+    const groupSizeChartData = useMemo(() => {
+        const data = [
+            { name: 'Parejas (2)', value: groupStats.couples, color: themeColor },
+            { name: 'Grupos (4-6)', value: groupStats.groups, color: '#64748b' },
+            { name: 'Eventos (7+)', value: groupStats.events, color: '#1e293b' }
+        ].filter(d => d.value > 0);
+        return data.length > 0 ? data : [{ name: 'Sin datos', value: 1, color: '#1e293b20' }];
+    }, [groupStats, themeColor]);
+
+    // GRÁFICO DE ORIGEN
+    const sourceData = useMemo(() => {
+        const data = [
+            { name: 'Bot', value: botCount, color: themeColor },
+            { name: 'Manual', value: totalReservations - botCount, color: '#334155' },
+        ].filter(d => d.value > 0);
+        return data.length > 0 ? data : [{ name: 'Sin datos', value: 1, color: '#1e293b20' }];
+    }, [botCount, totalReservations, themeColor]);
+
+
     return (
-        <div className="space-y-6 h-full flex flex-col pb-10">
-            
-            {/* HEADER */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight font-jakarta">
-                        Métricas de Sala
-                    </h1>
-                    <p className="text-slate-400 text-sm mt-1">
-                        Análisis de rendimiento: Bot de Reservas y Ocupación.
-                    </p>
+        <div className="h-full flex flex-col space-y-5 pb-6 overflow-x-hidden relative">
+
+            {/* --- HEADER CONTROL --- */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+
+                {/* Selector de Turnos */}
+                <div className="flex items-center gap-4">
+                    {isSplitMode && (
+                        <div className="flex bg-[#18181b] p-1 rounded-2xl border border-white/10 relative">
+                            {/* Fondo animado */}
+                            <motion.div
+                                layoutId="activeTab"
+                                className="absolute bg-white/10 rounded-xl inset-y-1"
+                                style={{
+                                    left: currentShift === 'lunch' ? '4px' : '50%',
+                                    width: 'calc(50% - 4px)'
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            />
+                            {[
+                                { id: 'lunch', label: 'Mediodía', icon: Sun },
+                                { id: 'dinner', label: 'Noche', icon: Moon }
+                            ].map((shift) => (
+                                <button
+                                    key={shift.id}
+                                    onClick={() => setCurrentShift(shift.id)}
+                                    className={cn(
+                                        "relative z-10 flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-colors duration-200",
+                                        currentShift === shift.id ? "text-white" : "text-slate-500 hover:text-slate-300"
+                                    )}
+                                >
+                                    <shift.icon size={14} /> {shift.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5 text-[10px] font-mono text-slate-300">
-                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
-                    LIVE DEMO
+
+                {/* Status Indicator */}
+                <div className="flex items-center gap-4">
+                    <div className="text-right hidden md:block">
+                        <div className="flex items-center justify-end gap-2">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            <span className="text-xs font-bold text-white tracking-widest">EN VIVO</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* GRID PRINCIPAL (Bento Grid) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
-                
-                {/* --- FILA 1: KPIs SUPERIORES (4 columnas) --- */}
-                
-                {/* KPI 1 */}
-                <BentoBox title="Reservas Totales" icon={CalendarCheck} delay={0.1}>
+            {/* --- KPIs PRINCIPALES --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
+                <BentoCard title="Mesas Activas" icon={CalendarCheck} delay={0.1}>
                     <div className="flex items-baseline gap-2 mt-auto">
-                        <h2 className="text-4xl font-bold text-white tabular-nums">54</h2>
-                        <span className="text-sm font-medium text-emerald-400 flex items-center">
-                            <ArrowUpRight size={14} /> 15%
+                        <span className="text-4xl font-bold text-white tabular-nums">{totalReservations}</span>
+                        {totalReservations > 0 && (
+                            <span className="text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center">
+                                <TrendingUp size={10} className="mr-1" /> ON
+                            </span>
+                        )}
+                    </div>
+                </BentoCard>
+
+                <BentoCard title="Comensales" icon={Users} delay={0.15}>
+                    <div className="flex items-baseline gap-2 mt-auto">
+                        <span className="text-4xl font-bold text-white tabular-nums">{totalPax}</span>
+                        <span className="text-slate-500 text-xs font-medium">pax</span>
+                    </div>
+                </BentoCard>
+
+                <BentoCard title="Ocupación" icon={Percent} delay={0.2}>
+                    <div className="flex justify-between items-end mb-2 mt-auto">
+                        <span className="text-4xl font-bold text-white tabular-nums">{occupancyPercentage}%</span>
+                        <span className="text-xs font-mono text-slate-400">{totalPax}/{maxCap}</span>
+                    </div>
+                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${occupancyPercentage}%` }}
+                            transition={{ duration: 1 }}
+                            className={cn("h-full", occupancyPercentage > 90 ? "bg-red-500" : "bg-primary")}
+                            style={{ backgroundColor: occupancyPercentage > 90 ? undefined : themeColor }}
+                        />
+                    </div>
+                </BentoCard>
+
+                <BentoCard title="Automatización" icon={Bot} delay={0.25}>
+                    <div className="flex items-baseline gap-2 mt-auto">
+                        <span className="text-4xl font-bold text-white tabular-nums">
+                            {totalReservations > 0 ? Math.round((botCount / totalReservations) * 100) : 0}%
                         </span>
+                        <span className="text-slate-500 text-xs">vía Bot</span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">8 pendientes de confirmar</p>
-                </BentoBox>
+                </BentoCard>
+            </div>
 
-                {/* KPI 2 */}
-                <BentoBox title="Volumen Chats" icon={MessageCircle} delay={0.15}>
-                    <div className="flex items-baseline gap-2 mt-auto">
-                        <h2 className="text-4xl font-bold text-white tabular-nums">218</h2>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1">Interacciones procesadas hoy</p>
-                </BentoBox>
+            {/* --- GRÁFICOS E INTELIGENCIA --- */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
 
-                {/* KPI 3 */}
-                <BentoBox title="Tasa de Conversión" icon={Target} delay={0.2}>
-                    <div className="flex items-baseline gap-2 mt-auto">
-                        <h2 className="text-4xl font-bold text-white tabular-nums">24.8%</h2>
-                    </div>
-                    <div className="w-full bg-white/10 h-1 mt-2 rounded-full overflow-hidden">
-                        <div className="h-full w-[24.8%]" style={{ backgroundColor: themeColor }} />
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1">Chat a Reserva Confirmada</p>
-                </BentoBox>
-
-                 {/* KPI 4 */}
-                 <BentoBox title="Tiempo Ahorrado" icon={Hourglass} delay={0.25}>
-                    <div className="flex items-baseline gap-2 mt-auto">
-                        <h2 className="text-4xl font-bold text-white tabular-nums">4.5<span className="text-lg">h</span></h2>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1">Calculado en atención auto.</p>
-                </BentoBox>
-
-
-                {/* --- FILA 2: GRÁFICO CENTRAL + LOG (Layout 3+1) --- */}
-
-                {/* CHART PRINCIPAL (Ocupa 3 de ancho) */}
-                <BentoBox title="Actividad por Hora (Impacto del Bot)" icon={Clock} delay={0.3} className="lg:col-span-3 min-h-[300px]">
-                    <div className="w-full h-full flex-1 min-h-[250px]">
+                {/* 1. CURVA DE DEMANDA */}
+                <BentoCard title="Demanda vs. Histórico" icon={Clock} delay={0.3} className="lg:col-span-2 min-h-[350px]">
+                    <div className="flex-1 w-full min-h-0 mt-4">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={hourlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                            <AreaChart data={comparisonChartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                                 <defs>
-                                    <linearGradient id="colorMensajes" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={themeColor} stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor={themeColor} stopOpacity={0}/>
+                                    <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={themeColor} stopOpacity={0.4} />
+                                        <stop offset="95%" stopColor={themeColor} stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                <XAxis 
-                                    dataKey="time" 
-                                    stroke="#64748b" 
-                                    fontSize={12} 
-                                    tickLine={false} 
-                                    axisLine={false} 
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                                <XAxis
+                                    dataKey="time"
+                                    stroke="#64748b"
+                                    fontSize={11}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    dy={10}
                                 />
-                                <Tooltip 
-                                    contentStyle={{ backgroundColor: '#09090b', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                                    itemStyle={{ fontSize: '12px' }}
+                                <YAxis
+                                    stroke="#64748b"
+                                    fontSize={10}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickFormatter={(val) => `${val}p`}
                                 />
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="mensajes" 
-                                    stroke={themeColor} 
-                                    strokeWidth={2}
-                                    fillOpacity={1} 
-                                    fill="url(#colorMensajes)" 
-                                    name="Consultas"
-                                />
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="reservas" 
-                                    stroke="#fff" 
+                                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '5 5' }} />
+
+                                <Area
+                                    type="monotone"
+                                    dataKey="historical"
+                                    stroke="#475569"
                                     strokeWidth={2}
                                     strokeDasharray="4 4"
                                     fill="transparent"
-                                    name="Reservas"
+                                    name="Promedio"
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="actual"
+                                    stroke={themeColor}
+                                    strokeWidth={3}
+                                    fill="url(#colorActual)"
+                                    name="Hoy"
+                                    animationDuration={1500}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
-                </BentoBox>
+                </BentoCard>
 
-                {/* LOG EN VIVO (Ocupa 1 de ancho) */}
-                <BentoBox title="Log en Vivo" icon={Zap} delay={0.35} className="lg:col-span-1 min-h-[300px]">
-                    <div className="flex-1 flex flex-col gap-3 overflow-hidden">
-                         <div className="absolute left-[21px] top-10 bottom-4 w-px bg-white/5" />
-                         
-                         {botLogs.map((log, i) => (
-                            <div key={i} className="flex gap-3 relative z-10">
-                                <div className={cn(
-                                    "w-2 h-2 rounded-full mt-1.5 ring-4 ring-[#0F0F10]",
-                                    log.status === 'highlight' ? "bg-white" : 
-                                    log.status === 'error' ? "bg-red-500" :
-                                    "bg-slate-700"
-                                )} style={log.status === 'highlight' ? { backgroundColor: themeColor } : {}} />
-                                
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-center">
-                                         <p className={cn(
-                                             "text-xs truncate font-medium",
-                                             log.status === 'highlight' ? "text-white" : "text-slate-400"
-                                         )}>{log.text}</p>
+                {/* 2. CANAL DE ENTRADA */}
+                <BentoCard title="Canal de Entrada" icon={Smartphone} delay={0.35} className="lg:col-span-1 min-h-[350px]">
+                    <div className="flex flex-col h-full justify-center gap-6">
+                        <div className="h-[200px] relative">
+                            {totalReservations > 0 ? (
+                                <>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={sourceData}
+                                                innerRadius={55}
+                                                outerRadius={75}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                                stroke="none"
+                                                cornerRadius={4}
+                                            >
+                                                {sourceData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                                            </Pie>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <Bot size={24} className="text-white mb-1" />
+                                        <span className="text-2xl font-bold text-white">{botCount}</span>
+                                        <span className="text-[9px] uppercase tracking-widest text-slate-500">Auto</span>
                                     </div>
-                                    <p className="text-[10px] text-slate-600 font-mono">{log.time}</p>
+                                </>
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center opacity-30">
+                                    <Bot size={40} className="mb-2" />
+                                    <p className="text-xs">Sin datos aún</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {totalReservations > 0 && (
+                            <div className="space-y-2">
+                                {sourceData.map((source, idx) => (
+                                    <div key={idx} className="flex justify-between items-center px-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: source.color }} />
+                                            <span className="text-xs text-slate-300 font-medium">{source.name}</span>
+                                        </div>
+                                        <span className="text-xs font-bold text-white">{source.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </BentoCard>
+
+                {/* 3. VANTRA INTELLIGENCE (TARJETA QUE ABRE MODAL) */}
+                <BentoCard
+                    title="Vantra Intelligence"
+                    icon={Sparkles}
+                    delay={0.4}
+                    className="lg:col-span-1 min-h-[180px]"
+                    // Gradiente sutil si el estado NO es nominal
+                    gradient={aiReport.color !== 'emerald'}
+                >
+                    <div className="flex flex-col h-full justify-between relative z-10">
+                        <div className="flex items-start gap-3 mt-2">
+                            <div className={cn(
+                                "p-2 rounded-lg shrink-0 transition-colors",
+                                aiReport.color === 'rose' ? "bg-rose-500/20 text-rose-400" :
+                                    aiReport.color === 'amber' ? "bg-amber-500/20 text-amber-400" :
+                                        aiReport.color === 'blue' ? "bg-blue-500/20 text-blue-400" :
+                                            "bg-emerald-500/20 text-emerald-400"
+                            )}>
+                                <Activity size={20} className={cn(aiReport.color === 'rose' && "animate-pulse")} />
+                            </div>
+                            <div>
+                                <h4 className={cn("text-sm font-bold mb-1",
+                                    aiReport.color === 'rose' ? "text-rose-400" :
+                                        aiReport.color === 'amber' ? "text-amber-400" : "text-white"
+                                )}>
+                                    {featuredInsight?.title || aiReport.mainHeadline}
+                                </h4>
+                                <p className="text-xs font-medium text-slate-300 leading-relaxed line-clamp-2">
+                                    "{featuredInsight?.text || "Analizando flujo de datos en tiempo real..."}"
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* EL BOTÓN AHORA ABRE EL MODAL */}
+                        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+
+                            {/* Status Badge (Reemplazó al Health Score) */}
+                            <div className="flex items-center gap-2">
+                                <div className={cn("w-2 h-2 rounded-full",
+                                    aiReport.color === 'rose' ? "bg-rose-500 animate-pulse" :
+                                        aiReport.color === 'amber' ? "bg-amber-500" :
+                                            aiReport.color === 'blue' ? "bg-blue-500" : "bg-emerald-500"
+                                )} />
+                                <span className={cn("text-[10px] font-bold uppercase tracking-wider",
+                                    aiReport.color === 'rose' ? "text-rose-400" :
+                                        aiReport.color === 'amber' ? "text-amber-400" :
+                                            aiReport.color === 'blue' ? "text-blue-400" : "text-emerald-400"
+                                )}>
+                                    {aiReport.label}
+                                </span>
+                            </div>
+
+                            <button
+                                onClick={() => setInsightModalOpen(true)}
+                                className={cn(
+                                    "text-xs font-bold hover:text-white transition-colors flex items-center gap-1 cursor-pointer",
+                                    aiReport.color === 'rose' ? "text-rose-400" :
+                                        aiReport.color === 'amber' ? "text-amber-400" :
+                                            "text-slate-400"
+                                )}
+                            >
+                                Ver Diagnóstico &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Fondo Alerta (Solo si es crítico) */}
+                    {aiReport.color === 'rose' && (
+                        <div className="absolute inset-0 bg-rose-500/5 z-0 pointer-events-none" />
+                    )}
+                </BentoCard>
+
+                {/* 4. TIPOS DE MESA */}
+                <BentoCard title="Tipos de Mesa" icon={UserCog} delay={0.45} className="lg:col-span-2 min-h-[180px]">
+                    <div className="flex flex-col h-full justify-center space-y-4">
+                        {totalReservations > 0 ? groupSizeChartData.map((group, idx) => (
+                            <div key={idx}>
+                                <div className="flex justify-between text-xs mb-1.5">
+                                    <span className="text-slate-300 font-medium flex items-center gap-2">
+                                        {group.name}
+                                    </span>
+                                    <span className="text-slate-400"><strong className="text-white">{group.value}</strong> mesas</span>
+                                </div>
+                                <div className="w-full h-2.5 bg-slate-800/50 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        whileInView={{ width: `${(group.value / totalReservations) * 100}%` }}
+                                        transition={{ duration: 1, delay: idx * 0.1 }}
+                                        className="h-full rounded-full"
+                                        style={{ backgroundColor: group.color }}
+                                    />
                                 </div>
                             </div>
-                         ))}
-                    </div>
-                </BentoBox>
-
-
-                {/* --- FILA 3: ANÁLISIS PROFUNDO (4 columnas) --- */}
-
-                {/* FUENTE DE RESERVAS (1 col) */}
-                <BentoBox title="Origen" icon={Smartphone} delay={0.4} className="lg:col-span-1 min-h-[200px]">
-                    <div className="flex-1 flex items-center justify-center">
-                         <ResponsiveContainer width="100%" height={140}>
-                            <BarChart data={sourceData} layout="vertical" barSize={20}>
-                                <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" width={70} tick={{fill:'#64748b', fontSize: 10}} axisLine={false} tickLine={false} />
-                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#000', border: 'none'}} />
-                                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                                    {sourceData.map((entry, index) => (
-                                        <Cell key={index} fill={entry.name === 'WhatsApp' ? themeColor : '#334155'} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </BentoBox>
-
-                {/* TAMAÑO DE GRUPOS (1 col) */}
-                <BentoBox title="Distribución Pax" icon={Users} delay={0.45} className="lg:col-span-1 min-h-[200px]">
-                     <div className="flex-1 flex items-center justify-center relative">
-                        <ResponsiveContainer width="100%" height={160}>
-                            <PieChart>
-                                <Pie
-                                    data={groupSizeData}
-                                    innerRadius={40}
-                                    outerRadius={60}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    stroke="none"
-                                >
-                                    {groupSizeData.map((entry, index) => (
-                                        <Cell key={index} fill={index === 0 ? themeColor : index === 1 ? '#475569' : '#1e293b'} />
-                                    ))}
-                                </Pie>
-                                <Tooltip contentStyle={{backgroundColor: '#000', borderRadius:'8px', border: '1px solid #333'}} itemStyle={{color:'#fff'}} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        {/* Texto central */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="text-xs font-bold text-slate-500">GRUPOS</span>
-                        </div>
-                     </div>
-                </BentoBox>
-
-                {/* METRICA FINAL: CAPACIDAD (2 cols) */}
-                <BentoBox title="Ocupación Proyectada" icon={Users} delay={0.5} className="lg:col-span-2 min-h-[200px]">
-                    <div className="h-full flex flex-col justify-center gap-4">
-                        <div className="flex justify-between items-end">
-                            <div>
-                                <h3 className="text-3xl font-bold text-white tabular-nums">85%</h3>
-                                <p className="text-xs text-slate-400">Capacidad total para esta noche</p>
+                        )) : (
+                            <div className="text-center text-slate-500 text-xs py-4">
+                                Esperando primeras reservas del turno...
                             </div>
-                            <div className="text-right">
-                                <span className="text-xs font-bold px-2 py-1 rounded bg-white/5 text-white">120 / 140 Pax</span>
-                            </div>
-                        </div>
-                        
-                        {/* Barra de Progreso Custom */}
-                        <div className="w-full h-4 bg-white/5 rounded-full overflow-hidden relative">
-                             {/* Fondo rayado */}
-                             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(45deg, #fff 25%, transparent 25%, transparent 50%, #fff 50%, #fff 75%, transparent 75%, transparent)', backgroundSize: '10px 10px' }} />
-                             
-                             {/* Progreso Sólido */}
-                             <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: '85%' }}
-                                transition={{ duration: 1, delay: 0.8 }}
-                                className="h-full rounded-full relative"
-                                style={{ backgroundColor: themeColor }}
-                             >
-                                 <div className="absolute right-0 top-0 bottom-0 w-1 bg-white/50" />
-                             </motion.div>
-                        </div>
-                        <p className="text-[10px] text-slate-500 text-right">Se recomienda liberar 2 mesas de reserva para Walk-ins.</p>
+                        )}
                     </div>
-                </BentoBox>
-
+                </BentoCard>
             </div>
+
+            {/* --- MODAL DE INTELIGENCIA (RENDERIZADO AL FINAL) --- */}
+            <AnimatePresence>
+                {isInsightModalOpen && (
+                    <IntelligenceModal
+                        isOpen={isInsightModalOpen}
+                        onClose={() => setInsightModalOpen(false)}
+                        data={aiReport}
+                    />
+                )}
+            </AnimatePresence>
+
         </div>
     );
 };

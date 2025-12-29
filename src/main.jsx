@@ -1,13 +1,16 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import { ThemeProvider } from './context/ThemeContext'
+import './index.css'
+import { ThemeProvider } from './context/ThemeContext.jsx'
+import { ReservationsProvider } from './context/ReservationsContext.jsx' // <--- IMPORTAR
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
     <ThemeProvider>
-      <App />
+      <ReservationsProvider> {/* <--- ENVOLVER AQUI */}
+        <App />
+      </ReservationsProvider>
     </ThemeProvider>
-  </StrictMode>,
+  </React.StrictMode>,
 )
