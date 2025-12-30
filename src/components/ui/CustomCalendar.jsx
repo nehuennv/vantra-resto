@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, ChevronsLeft, ChevronsRight, CalendarDays, History } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { useTheme } from '../../context/ThemeContext';
+import { getContrastColor } from "../../lib/colors";
 
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = "#10b981" }) => {
+
+    // Contexto de Tema
+    const { themeMode } = useTheme();
 
     // Sincronizar estado interno cuando se abre
     const [viewDate, setViewDate] = useState(new Date());
@@ -63,7 +68,7 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
             {isOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
 
-                    {/* BACKDROP (Fondo Oscuro) */}
+                    {/* BACKDROP */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -79,20 +84,28 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ type: "spring", stiffness: 300, damping: 25, duration: 0.3 }}
-                        className="bg-[#0F0F10] border border-white/10 rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden relative z-10 flex flex-col"
+                        className={cn(
+                            "border rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden relative z-10 flex flex-col transition-all duration-300",
+                            themeMode === 'light'
+                                ? "bg-white border-gray-100" // Clean White Mode
+                                : "bg-card border-border" // Solid Dark Mode
+                        )}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* --- HEADER --- */}
-                        <div className="px-5 py-4 border-b border-white/5 bg-[#131316] flex items-center justify-between shrink-0">
+                        <div className="px-5 py-4 border-b border-border bg-card/80 backdrop-blur-sm flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-2.5">
-                                <div className="p-2 rounded-lg bg-white/5 border border-white/5 text-white" style={{ color: themeColor }}>
+                                <div
+                                    className="p-2 rounded-lg bg-muted border border-border shadow-sm"
+                                    style={{ color: themeColor }}
+                                >
                                     <CalendarDays size={16} />
                                 </div>
-                                <span className="font-bold text-white text-sm tracking-wide">Seleccionar Fecha</span>
+                                <span className="font-bold text-foreground text-sm tracking-wide">Seleccionar Fecha</span>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-colors outline-none focus:outline-none focus:ring-0"
+                                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors outline-none focus:outline-none focus:ring-0"
                             >
                                 <X size={18} />
                             </button>
@@ -102,32 +115,32 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                         <div className="p-5">
 
                             {/* NAVEGACIÓN (Diseño Cápsula) */}
-                            <div className="flex items-center justify-between bg-[#18181b] border border-white/5 rounded-xl p-1 mb-6 shadow-sm">
+                            <div className="flex items-center justify-between bg-muted/80 border border-border rounded-xl p-1 mb-6 shadow-sm">
                                 <div className="flex items-center">
-                                    <button onClick={handlePrevYear} className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors outline-none focus:outline-none focus:ring-0">
+                                    <button onClick={handlePrevYear} className="p-2 text-muted-foreground hover:text-foreground hover:bg-card rounded-lg transition-colors outline-none focus:outline-none focus:ring-0">
                                         <ChevronsLeft size={16} />
                                     </button>
-                                    <div className="w-[1px] h-4 bg-white/5 mx-0.5" />
-                                    <button onClick={handlePrevMonth} className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors outline-none focus:outline-none focus:ring-0">
+                                    <div className="w-[1px] h-4 bg-border mx-0.5" />
+                                    <button onClick={handlePrevMonth} className="p-2 text-muted-foreground hover:text-foreground hover:bg-card rounded-lg transition-colors outline-none focus:outline-none focus:ring-0">
                                         <ChevronLeft size={16} />
                                     </button>
                                 </div>
 
                                 <div className="flex flex-col items-center px-2 cursor-default min-w-[100px]">
-                                    <span className="text-sm font-bold text-white capitalize leading-none mb-0.5">
+                                    <span className="text-sm font-bold text-foreground capitalize leading-none mb-0.5">
                                         {MONTHS[month]}
                                     </span>
-                                    <span className="text-[10px] font-bold text-slate-500 font-mono leading-none">
+                                    <span className="text-[10px] font-bold text-muted-foreground font-mono leading-none">
                                         {year}
                                     </span>
                                 </div>
 
                                 <div className="flex items-center">
-                                    <button onClick={handleNextMonth} className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors outline-none focus:outline-none focus:ring-0">
+                                    <button onClick={handleNextMonth} className="p-2 text-muted-foreground hover:text-foreground hover:bg-card rounded-lg transition-colors outline-none focus:outline-none focus:ring-0">
                                         <ChevronRight size={16} />
                                     </button>
-                                    <div className="w-[1px] h-4 bg-white/5 mx-0.5" />
-                                    <button onClick={handleNextYear} className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors outline-none focus:outline-none focus:ring-0">
+                                    <div className="w-[1px] h-4 bg-border mx-0.5" />
+                                    <button onClick={handleNextYear} className="p-2 text-muted-foreground hover:text-foreground hover:bg-card rounded-lg transition-colors outline-none focus:outline-none focus:ring-0">
                                         <ChevronsRight size={16} />
                                     </button>
                                 </div>
@@ -136,7 +149,7 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                             {/* DÍAS SEMANA */}
                             <div className="grid grid-cols-7 mb-2">
                                 {DAYS.map(day => (
-                                    <div key={day} className="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider py-1">
+                                    <div key={day} className="text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wider py-1">
                                         {day}
                                     </div>
                                 ))}
@@ -145,14 +158,14 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                             {/* GRILLA DÍAS (42 Celdas Fijas) */}
                             <div className="grid grid-cols-7 gap-1">
 
-                                {/* 1. Días del Mes ANTERIOR (Opacidad baja) */}
+                                {/* 1. Días del Mes ANTERIOR (Opacidad baja COMO ESTABA) */}
                                 {Array.from({ length: firstDayOfMonth }).map((_, i) => {
                                     const day = daysInPrevMonth - firstDayOfMonth + i + 1;
                                     return (
                                         <button
                                             key={`prev-${day}`}
                                             onClick={() => handleSelectDay(day, -1)}
-                                            className="h-9 w-full rounded-lg flex items-center justify-center text-xs font-medium text-slate-700 hover:text-slate-400 hover:bg-white/[0.02] transition-colors outline-none focus:outline-none focus:ring-0"
+                                            className="h-9 w-full rounded-lg flex items-center justify-center text-xs font-medium text-muted-foreground opacity-30 hover:opacity-50 hover:bg-muted/30 transition-all outline-none focus:outline-none focus:ring-0"
                                         >
                                             {day}
                                         </button>
@@ -176,9 +189,9 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                                             className={cn(
                                                 "h-9 w-full rounded-lg flex items-center justify-center text-xs font-bold transition-all relative outline-none focus:outline-none focus:ring-0",
                                                 isSelected
-                                                    ? "text-white shadow-md z-10 scale-105"
-                                                    : "text-slate-300 hover:bg-white/5 hover:text-white",
-                                                !isSelected && isToday && "bg-white/[0.03] border border-white/10 text-white"
+                                                    ? "text-primary-foreground shadow-md z-10 scale-105"
+                                                    : "text-foreground hover:bg-muted/60 hover:text-foreground",
+                                                !isSelected && isToday && "bg-muted border border-border text-foreground"
                                             )}
                                             style={{ backgroundColor: isSelected ? themeColor : undefined }}
                                         >
@@ -193,14 +206,14 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                                     );
                                 })}
 
-                                {/* 3. Días del Mes SIGUIENTE (Relleno para completar grilla) */}
+                                {/* 3. Días del Mes SIGUIENTE (Relleno COMO ESTABA) */}
                                 {Array.from({ length: daysFromNextMonth }).map((_, i) => {
                                     const day = i + 1;
                                     return (
                                         <button
                                             key={`next-${day}`}
                                             onClick={() => handleSelectDay(day, 1)}
-                                            className="h-9 w-full rounded-lg flex items-center justify-center text-xs font-medium text-slate-700 hover:text-slate-400 hover:bg-white/[0.02] transition-colors outline-none focus:outline-none focus:ring-0"
+                                            className="h-9 w-full rounded-lg flex items-center justify-center text-xs font-medium text-muted-foreground opacity-30 hover:opacity-50 hover:bg-muted/30 transition-all outline-none focus:outline-none focus:ring-0"
                                         >
                                             {day}
                                         </button>
@@ -211,9 +224,9 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                             {/* FOOTER */}
                             <button
                                 onClick={handleGoToToday}
-                                className="w-full mt-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-all group active:scale-95 outline-none focus:outline-none focus:ring-0"
+                                className="w-full mt-5 py-2.5 rounded-xl bg-muted border border-border flex items-center justify-center gap-2 text-xs font-bold text-foreground hover:bg-primary/10 hover:border-primary/30 transition-all group active:scale-95 outline-none focus:outline-none focus:ring-0"
                             >
-                                <History size={14} className="text-slate-500 group-hover:text-primary transition-colors" style={{ color: 'inherit' }} />
+                                <History size={14} className="text-muted-foreground group-hover:text-primary transition-colors" style={{ color: 'inherit' }} />
                                 <span className="group-hover:translate-x-0.5 transition-transform">
                                     Ir a Hoy ({currentDay} de {MONTHS[currentMonth]})
                                 </span>

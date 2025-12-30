@@ -11,39 +11,48 @@ const SettingToggle = ({ icon: Icon, title, description, active, onToggle }) => 
             "relative flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all duration-300 group select-none overflow-hidden",
             active
                 ? "bg-primary/5 border-primary/50 shadow-[0_0_20px_-10px_rgba(var(--primary),0.3)]"
-                : "bg-[#18181b] border-white/5 hover:bg-white/5 hover:border-white/10"
+                : "bg-card border-border hover:bg-muted"
         )}
     >
         {!active && (
-            <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-r from-muted to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         )}
 
         <div className="relative z-10 flex items-start gap-4">
             <div className={cn(
                 "p-2.5 rounded-xl transition-colors duration-300",
-                active ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-white/5 text-slate-400 group-hover:text-white"
+                active
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                    : "bg-muted/80 text-muted-foreground group-hover:text-foreground group-hover:bg-muted"
             )}>
                 <Icon size={18} strokeWidth={active ? 2.5 : 1.5} />
             </div>
             <div>
-                <h4 className={cn("font-bold text-sm transition-colors font-jakarta", active ? "text-white" : "text-slate-300 group-hover:text-white")}>
+                <h4 className={cn(
+                    "font-bold text-sm transition-colors font-jakarta",
+                    active ? "text-foreground" : "text-foreground/90 group-hover:text-foreground"
+                )}>
                     {title}
                 </h4>
-                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed font-medium">{description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed font-medium">
+                    {description}
+                </p>
             </div>
         </div>
 
-        {/* MANTENEMOS TU LÓGICA DE JUSTIFY QUE YA ESTABA BIEN */}
+        {/* Toggle Switch con Vantra Semantics */}
         <div className={cn(
             "w-12 h-7 rounded-full relative transition-colors duration-300 flex items-center px-1",
-            active ? "bg-primary justify-end" : "bg-slate-800 border border-white/5 justify-start"
+            active
+                ? "bg-primary justify-end"
+                : "bg-muted/80 border border-border justify-start"
         )}>
             <motion.div
                 layout
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 className={cn(
                     "w-5 h-5 rounded-full shadow-sm",
-                    active ? "bg-white" : "bg-slate-500"
+                    active ? "bg-primary-foreground" : "bg-foreground/30"
                 )}
             />
         </div>
@@ -51,7 +60,6 @@ const SettingToggle = ({ icon: Icon, title, description, active, onToggle }) => 
 );
 
 const SettingsPanel = ({ isOpen, onClose }) => {
-    // 1. AQUÍ AGREGAMOS SOLO LO QUE FALTA (themeMode, toggleTheme)
     const {
         soundEnabled,
         toggleSound,
@@ -59,8 +67,8 @@ const SettingsPanel = ({ isOpen, onClose }) => {
         setFontSize,
         highContrast,
         setHighContrast,
-        themeMode,   // <--- NUEVO
-        toggleTheme  // <--- NUEVO
+        themeMode,
+        toggleTheme
     } = useTheme();
 
     const adjustFont = (delta) => {
@@ -76,68 +84,102 @@ const SettingsPanel = ({ isOpen, onClose }) => {
         <AnimatePresence>
             {isOpen && (
                 <>
+                    {/* Overlay Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+                        className="fixed inset-0 bg-background/60 backdrop-blur-sm z-[60]"
                     />
 
+                    {/* Panel Principal */}
                     <motion.div
                         initial={{ x: "100%" }}
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[#0A0A0B] border-l border-white/10 shadow-2xl z-[70] flex flex-col"
+                        className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-background border-l border-border shadow-2xl z-[70] flex flex-col"
                     >
-                        {/* Header */}
-                        <div className="px-8 py-6 border-b border-white/10 flex items-center justify-between bg-[#0F0F10]">
+                        {/* Header con Glass Effect */}
+                        <div className="px-8 py-6 border-b border-border flex items-center justify-between bg-card">
                             <div>
-                                <h2 className="text-xl font-bold text-white font-jakarta tracking-tight">Preferencias</h2>
-                                <p className="text-xs font-medium text-slate-500 mt-1 uppercase tracking-wider">Configuración del Sistema</p>
+                                <h2 className="text-xl font-bold text-foreground font-jakarta tracking-tight">
+                                    Preferencias
+                                </h2>
+                                <p className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+                                    Configuración del Sistema
+                                </p>
                             </div>
-                            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-90 outline-none">
+                            <button
+                                onClick={onClose}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-90 outline-none focus:ring-2 ring-ring"
+                            >
                                 <X size={20} />
                             </button>
                         </div>
 
-                        {/* Body */}
+                        {/* Body con Scrollbar Vantra */}
                         <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
 
-                            {/* SECCIÓN TIPOGRAFÍA (Intacta) */}
+                            {/* SECCIÓN TIPOGRAFÍA */}
                             <section>
                                 <div className="flex items-center gap-2 mb-4 opacity-80">
                                     <Type size={14} className="text-primary" />
-                                    <h3 className="text-xs font-bold text-white uppercase tracking-widest">Tipografía</h3>
+                                    <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">
+                                        Tipografía
+                                    </h3>
                                 </div>
 
-                                <div className="bg-[#18181b] border border-white/5 rounded-2xl p-5 space-y-4">
+                                <div className="bg-card border border-border rounded-2xl p-5 space-y-4 shadow-sm">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-slate-300">Escala de Texto</span>
+                                        <span className="text-sm font-medium text-foreground/90">
+                                            Escala de Texto
+                                        </span>
                                         <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md border border-primary/20">
                                             {fontSize}%
                                         </span>
                                     </div>
 
-                                    <div className="flex items-center bg-black/40 rounded-xl p-1 border border-white/5 h-12 relative">
-                                        <button onClick={() => adjustFont(-5)} disabled={fontSize <= 85} className="flex-1 h-full flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 transition-colors rounded-lg active:bg-white/5">
+                                    <div className="flex items-center bg-muted/50 rounded-xl p-1 border border-border h-12 relative">
+                                        <button
+                                            onClick={() => adjustFont(-5)}
+                                            disabled={fontSize <= 85}
+                                            className="flex-1 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors rounded-lg hover:bg-muted/80 active:bg-muted"
+                                        >
                                             <span className="text-xs font-bold">A-</span>
                                         </button>
-                                        <div className="w-px h-4 bg-white/10" />
-                                        <button onClick={() => setFontSize(100)} className="flex-[2] h-full flex items-center justify-center gap-2 text-slate-300 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">
+
+                                        <div className="w-px h-4 bg-border" />
+
+                                        <button
+                                            onClick={() => setFontSize(100)}
+                                            className="flex-[2] h-full flex items-center justify-center gap-2 text-foreground/80 hover:text-foreground transition-colors text-[10px] font-bold uppercase tracking-wider hover:bg-muted/80"
+                                        >
                                             {fontSize === 100 && <Check size={12} className="text-primary" />}
                                             Predeterminado
                                         </button>
-                                        <div className="w-px h-4 bg-white/10" />
-                                        <button onClick={() => adjustFont(5)} disabled={fontSize >= 115} className="flex-1 h-full flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 transition-colors rounded-lg active:bg-white/5">
+
+                                        <div className="w-px h-4 bg-border" />
+
+                                        <button
+                                            onClick={() => adjustFont(5)}
+                                            disabled={fontSize >= 115}
+                                            className="flex-1 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors rounded-lg hover:bg-muted/80 active:bg-muted"
+                                        >
                                             <span className="text-base font-bold">A+</span>
                                         </button>
                                     </div>
-                                    <div className="h-px w-full bg-white/5 my-2" />
+
+                                    <div className="h-px w-full bg-border my-2" />
+
                                     <div className="flex items-center justify-between px-1">
-                                        <span className="text-[10px] text-slate-500 font-medium">Compacto</span>
-                                        <span className="text-[10px] text-slate-500 font-medium">Amplio</span>
+                                        <span className="text-[10px] text-muted-foreground font-medium">
+                                            Compacto
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground font-medium">
+                                            Amplio
+                                        </span>
                                     </div>
                                 </div>
                             </section>
@@ -146,17 +188,19 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                             <section>
                                 <div className="flex items-center gap-2 mb-4 opacity-80">
                                     <Monitor size={14} className="text-primary" />
-                                    <h3 className="text-xs font-bold text-white uppercase tracking-widest">Interfaz</h3>
+                                    <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">
+                                        Interfaz
+                                    </h3>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <SettingToggle
+                                    {/* <SettingToggle
                                         icon={Monitor}
                                         title="Alto Contraste"
                                         description="Resalta bordes y separadores."
                                         active={highContrast}
                                         onToggle={() => setHighContrast(!highContrast)}
-                                    />
+                                    /> */}
 
                                     <SettingToggle
                                         icon={BellRing}
@@ -166,23 +210,22 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                                         onToggle={toggleSound}
                                     />
 
-                                    {/* 2. AQUÍ CONECTAMOS EL TOGGLE REAL */}
                                     <SettingToggle
                                         icon={Moon}
                                         title="Modo Oscuro"
                                         description="Optimizado para ambientes nocturnos."
-                                        active={themeMode === 'dark'} // <--- AHORA LEE LA VERDAD
-                                        onToggle={toggleTheme}        // <--- AHORA EJECUTA LA ACCIÓN
+                                        active={themeMode === 'dark'}
+                                        onToggle={toggleTheme}
                                     />
                                 </div>
                             </section>
                         </div>
 
-                        {/* Footer (Intacto) */}
-                        <div className="p-6 border-t border-white/10 bg-[#0F0F10]">
+                        {/* Footer con Botón Principal */}
+                        <div className="p-6 border-t border-border bg-card">
                             <button
                                 onClick={onClose}
-                                className="w-full py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-transform active:scale-[0.98] outline-none"
+                                className="w-full py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-transform active:scale-[0.98] outline-none focus:ring-2 ring-ring ring-offset-2 ring-offset-background"
                             >
                                 <Save size={18} strokeWidth={2.5} />
                                 <span className="tracking-wide text-sm">Cerrar</span>

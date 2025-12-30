@@ -4,59 +4,130 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- RESET GLOBAL PARA ELIMINAR OUTLINES --- */
-/* Esto mata el borde azul/blanco en TODOS los botones e inputs al hacer click */
-*:focus {
+/* --- RESET GLOBAL --- */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+  /* Elimina flash azul/gris en móviles */
+}
+
+*:focus,
+*:focus-visible,
+*:active {
   outline: none !important;
   box-shadow: none !important;
-  /* A veces el focus es un box-shadow */
+  ring: 0 !important;
+  border-color: transparent !important;
+  /* Si algún borde cambia de color por defecto */
 }
 
-/* Opcional: Si quieres que solo se vea algo al navegar con TAB (Accesibilidad), 
-   descomenta esto. Pero si quieres "cero bordes" siempre, déjalo comentado. */
-/* *:focus-visible {
-   outline: 2px solid var(--primary); 
-   outline-offset: 2px;
-} */
-
-
-:root {
-  /* VANTRA DARK THEME */
-  --background: 222 47% 11%;
-  /* Slate 900 Profundo */
-  --foreground: 210 40% 98%;
-
-  --primary: 217 91% 60%;
-  /* Azul Eléctrico por defecto */
-  --primary-foreground: 222 47% 11%;
-
-  --card: 217 33% 17%;
-  --card-foreground: 210 40% 98%;
-
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-
-  --border: 217 33% 20%;
+/* Revertir border-color transparente para inputs que si lo necesiten */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: hsl(var(--primary)) !important;
+  /* Devolvemos el control a los inputs reales */
 }
 
+@layer base {
+  :root {
+    /* --- LIGHT MODE (Clínico, Limpio, Profesional) --- */
+    --background: 0 0% 100%;
+    /* Blanco Puro */
+    --foreground: 222.2 84% 4.9%;
+    /* Slate 950 (Casi negro) */
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    /* Azul Vibrante (Brand) */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* EL SECRETO LIGHT: Un gris suave (Slate 200) para separar secciones */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* --- VANTRA DARK MODE (Premium, Disruptivo, Glass) --- */
+    --background: 222 47% 11%;
+    /* Tu Slate 900 Profundo */
+    --foreground: 210 40% 98%;
+    /* Blanco hueso */
+
+    --card: 222 47% 11%;
+    /* Mismo que bg para efecto clean */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    /* Tu Azul Eléctrico */
+    --primary-foreground: 222 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* EL SECRETO DARK: Un gris oscuro casi azulado. 
+       Visualmente parece una línea blanca al 10% de opacidad, 
+       pero es un color sólido que no brilla en exceso. */
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+/* --- ESTILOS BASE DEL BODY --- */
 body {
-  @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30 selection:text-white;
+  @apply bg-background text-foreground font-sans antialiased;
+  /* Transición suave de colores al cambiar de tema */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-  /* Fondo Premium Fijo (Mejorado para que cubra todo siempre) */
+/* --- GRADIENTE SOLO PARA MODO OSCURO --- */
+/* Mantenemos tu background disruptivo, pero solo en dark mode para no ensuciar el light mode */
+.dark body {
   background-color: hsl(222, 47%, 11%);
   background-image:
     radial-gradient(circle at 0% 0%, rgba(20, 20, 30, 1) 0%, transparent 50%),
     radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-    /* Luz azul sutil arriba */
     radial-gradient(circle at 100% 0%, rgba(244, 63, 94, 0.1) 0%, transparent 50%);
-  /* Luz rosa sutil derecha */
   background-attachment: fixed;
   background-size: cover;
-  min-height: 100vh;
 }
 
-/* --- SCROLLBARS PERSONALIZADOS (Estilo "Dark Mode") --- */
-/* Chrome, Edge, Safari */
+/* --- SCROLLBARS --- */
+/* Optimizados para verse bien en ambos modos */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -67,21 +138,22 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  @apply bg-gray-300 dark:bg-white/10;
+  /* Gris en light, Translucido en dark */
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  @apply bg-gray-400 dark:bg-white/20;
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  scrollbar-color: var(--border) transparent;
+  /* Usa la variable de borde adaptativa */
 }
 
-/* Clase de utilidad para ocultar scrollbar pero permitir scroll */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -89,4 +161,10 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }

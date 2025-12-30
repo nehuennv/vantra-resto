@@ -26,14 +26,11 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
         return new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
     };
 
-    // Variantes para la animación en cascada de la lista
     const containerVariants = {
         hidden: { opacity: 0 },
         show: {
             opacity: 1,
-            transition: {
-                staggerChildren: 0.1 // Retraso entre cada item
-            }
+            transition: { staggerChildren: 0.1 }
         }
     };
 
@@ -47,58 +44,59 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
             {isOpen && data && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
 
-                    {/* Backdrop */}
+                    {/* BACKDROP: Oscuro absoluto para centrar la atención */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[90]"
+                        className="fixed inset-0 bg-black/90 backdrop-blur-md z-[90]"
                     />
 
-                    {/* Modal Card */}
+                    {/* MODAL CARD: SÓLIDO Y CONTRASTADO */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
-                        className="relative w-full max-w-2xl bg-[#0F0F10] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100] flex flex-col max-h-[85vh]"
+                        // bg-background o bg-card pero SIN transparencia para que no se pise con el fondo
+                        className="relative w-full max-w-2xl bg-background border border-border rounded-2xl shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden z-[100] flex flex-col max-h-[85vh]"
                     >
-                        {/* Borde Superior Colorizado */}
-                        <div className={cn("absolute top-0 inset-x-0 h-1",
+                        {/* Borde Superior de Estado */}
+                        <div className={cn("absolute top-0 inset-x-0 h-1 z-50",
                             data.color === 'rose' ? "bg-rose-500" :
                                 data.color === 'amber' ? "bg-amber-500" :
                                     data.color === 'blue' ? "bg-blue-500" :
                                         "bg-emerald-500"
                         )} />
 
-                        {/* --- HEADER --- */}
-                        <div className="px-6 py-5 border-b border-white/5 bg-[#131316] relative">
+                        {/* --- HEADER SÓLIDO --- */}
+                        <div className="px-6 py-5 border-b border-border bg-muted/50 relative shrink-0">
                             <div className="flex justify-between items-start relative z-10">
                                 <div className="flex gap-4">
                                     <div className={cn(
-                                        "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border bg-white/5",
-                                        data.color === 'rose' ? "border-rose-500/20 text-rose-500 bg-rose-500/5" :
-                                            data.color === 'amber' ? "border-amber-500/20 text-amber-500 bg-amber-500/5" :
-                                                data.color === 'blue' ? "border-blue-500/20 text-blue-500 bg-blue-500/5" :
-                                                    "border-emerald-500/20 text-emerald-500 bg-emerald-500/5"
+                                        "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border shadow-sm bg-background",
+                                        data.color === 'rose' ? "border-rose-500/30 text-rose-500" :
+                                            data.color === 'amber' ? "border-amber-500/30 text-amber-500" :
+                                                data.color === 'blue' ? "border-blue-500/30 text-blue-500" :
+                                                    "border-emerald-500/30 text-emerald-500"
                                     )}>
                                         <Sparkles size={24} />
                                     </div>
 
                                     <div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h2 className="text-lg font-bold text-white tracking-tight">Vantra Intelligence</h2>
-                                            <div className={cn("px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border",
-                                                data.color === 'rose' ? "border-rose-500/20 text-rose-400 bg-rose-500/10" :
-                                                    data.color === 'amber' ? "border-amber-500/20 text-amber-400 bg-amber-500/10" :
-                                                        data.color === 'blue' ? "border-blue-500/20 text-blue-400 bg-blue-500/10" :
-                                                            "border-emerald-500/20 text-emerald-400 bg-emerald-500/10"
+                                        <div className="flex items-center gap-2 ">
+                                            <h2 className="text-lg font-bold text-foreground tracking-tight">Vantra Intelligence</h2>
+                                            <div className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border bg-background",
+                                                data.color === 'rose' ? "border-rose-500/40 text-rose-500" :
+                                                    data.color === 'amber' ? "border-amber-500/40 text-amber-500" :
+                                                        data.color === 'blue' ? "border-blue-500/40 text-blue-500" :
+                                                            "border-emerald-500/40 text-emerald-500"
                                             )}>
                                                 {data.label}
                                             </div>
                                         </div>
-                                        <p className="text-sm text-slate-400 font-medium">
+                                        <p className="text-sm text-muted-foreground font-semibold">
                                             Análisis operativo en tiempo real
                                         </p>
                                     </div>
@@ -106,16 +104,16 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
 
                                 <button
                                     onClick={onClose}
-                                    className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-colors"
+                                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
                         </div>
 
-                        {/* --- BODY SCROLLABLE (Con Animación Stagger) --- */}
+                        {/* --- BODY (CONTRASTE ALTO) --- */}
                         <motion.div
-                            className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 bg-[#0F0F10]"
+                            className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 bg-background"
                             variants={containerVariants}
                             initial="hidden"
                             animate="show"
@@ -130,60 +128,51 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                                         key={idx}
                                         variants={itemVariants}
                                         className={cn(
-                                            "group flex gap-4 p-4 rounded-xl border transition-all duration-300",
-                                            // HOVER EFFECTS: Transformación suave y cambio de borde/fondo
-                                            "hover:translate-x-1 hover:shadow-lg",
-                                            isCriticalItem ? "bg-rose-500/5 border-rose-500/20 hover:bg-rose-500/10 hover:border-rose-500/30 hover:shadow-rose-900/10" :
-                                                isAlertItem ? "bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10 hover:border-amber-500/30 hover:shadow-amber-900/10" :
-                                                    "bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.04]"
+                                            "group flex gap-4 p-5 rounded-xl border transition-all duration-300",
+                                            isCriticalItem ? "bg-rose-500/[0.03] border-rose-500/30" :
+                                                isAlertItem ? "bg-amber-500/[0.03] border-amber-500/30" :
+                                                    "bg-muted/10 border-border hover:bg-muted/20"
                                         )}
                                     >
-                                        {/* Icono Lateral */}
                                         <div className={cn(
-                                            "p-2.5 rounded-lg h-fit shrink-0 transition-colors duration-300",
-                                            isCriticalItem ? "bg-rose-500/10 text-rose-400 group-hover:bg-rose-500/20 group-hover:text-rose-300" :
-                                                isAlertItem ? "bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20 group-hover:text-amber-300" :
-                                                    item.type === 'warning' ? "bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20" :
-                                                        "bg-white/5 text-slate-400 group-hover:text-slate-200 group-hover:bg-white/10"
+                                            "p-3 rounded-lg h-fit shrink-0 border bg-background shadow-sm",
+                                            isCriticalItem ? "text-rose-600 border-rose-500/20" :
+                                                isAlertItem ? "text-amber-600 border-amber-500/20" :
+                                                    "text-muted-foreground border-border group-hover:text-primary transition-colors"
                                         )}>
-                                            <Icon size={20} strokeWidth={2} />
+                                            <Icon size={22} strokeWidth={2.5} />
                                         </div>
 
-                                        {/* Contenido */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between gap-2 mb-1.5">
-                                                <h4 className={cn("text-sm font-bold transition-colors",
-                                                    isCriticalItem ? "text-rose-200 group-hover:text-rose-100" : "text-white"
+                                            <div className="flex items-center justify-between gap-2 mb-2">
+                                                <h4 className={cn("text-sm font-bold",
+                                                    isCriticalItem ? "text-rose-700 dark:text-rose-400" : "text-foreground"
                                                 )}>
                                                     {item.title}
                                                 </h4>
-                                                <span className="text-[10px] font-bold uppercase text-slate-500 px-2 py-0.5 rounded bg-white/5 border border-white/5">
+                                                <span className="text-[10px] font-black uppercase text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                                                     {item.area}
                                                 </span>
                                             </div>
 
-                                            <p className="text-xs text-slate-300 leading-relaxed font-medium mb-3">
+                                            <p className="text-xs text-muted-foreground leading-relaxed font-bold">
                                                 {item.text}
                                             </p>
 
-                                            {/* Acción Recomendada (SIN MONOSPACE) */}
                                             {item.action && (
                                                 <div className={cn(
-                                                    "mt-3 pl-3 border-l-2 py-1 transition-colors",
-                                                    isCriticalItem ? "border-rose-500/30" : "border-blue-500/30"
+                                                    "mt-4 p-3 border-l-4 rounded-r-lg bg-muted/40",
+                                                    isCriticalItem ? "border-rose-500" : "border-primary"
                                                 )}>
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <Lightbulb size={12} className={cn(
-                                                            isCriticalItem ? "text-rose-400" : "text-blue-400"
-                                                        )} />
-                                                        <span className={cn("text-[10px] font-bold uppercase tracking-wider",
-                                                            isCriticalItem ? "text-rose-400" : "text-blue-400"
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <Lightbulb size={14} className={isCriticalItem ? "text-rose-600" : "text-primary"} />
+                                                        <span className={cn("text-[10px] font-black uppercase tracking-widest",
+                                                            isCriticalItem ? "text-rose-600" : "text-primary"
                                                         )}>
-                                                            Sugerencia
+                                                            Recomendación Estratégica
                                                         </span>
                                                     </div>
-                                                    {/* Fuente normal, color claro para lectura fácil */}
-                                                    <p className="text-xs text-slate-200 font-medium">
+                                                    <p className="text-xs text-foreground font-black italic">
                                                         {item.action}
                                                     </p>
                                                 </div>
@@ -194,8 +183,8 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                             })}
                         </motion.div>
 
-                        {/* --- FOOTER STATIC --- */}
-                        <div className="px-6 py-4 border-t border-white/5 bg-[#131316] flex justify-between items-center shrink-0">
+                        {/* --- FOOTER SÓLIDO --- */}
+                        <div className="px-6 py-4 border-t border-border bg-muted/50 flex justify-between items-center shrink-0">
                             <div className="flex items-center gap-2">
                                 <span className={cn("relative flex h-2 w-2",
                                     data.color === 'rose' ? "text-rose-500" :
@@ -206,12 +195,11 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
                                 </span>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                                    Live Analysis
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                    Vantra Intelligence Live
                                 </p>
                             </div>
-                            {/* Fuente normal para la hora también */}
-                            <p className="text-[11px] font-medium text-slate-500">
+                            <p className="text-[11px] font-bold text-muted-foreground tabular-nums bg-background px-2 py-1 rounded border border-border">
                                 {getCurrentTime()}
                             </p>
                         </div>

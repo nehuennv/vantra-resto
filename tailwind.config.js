@@ -2,6 +2,7 @@
 import colors from 'tailwindcss/colors';
 
 export default {
+    darkMode: 'class', // Habilita el control manual del modo oscuro
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
@@ -12,23 +13,26 @@ export default {
         current: 'currentColor',
         extend: {
             colors: {
-                // --- VARIABLES DINÁMICAS ---
+                // --- SISTEMA DE COLORES VANTRA (Semántico) ---
+                // Estos colores "escucharán" a tus variables CSS en index.css
+
                 background: "hsl(var(--background) / <alpha-value>)",
-                sidebar: "hsl(var(--sidebar) / <alpha-value>)",
                 foreground: "hsl(var(--foreground) / <alpha-value>)",
 
-                // --- EL FIX DEFINITIVO ---
-                // Mapeamos 'white-alpha' a la variable de borde.
-                // IMPORTANTE: Al usar ThemeContext nuevo, --border-color ya tiene el color exacto (Gris Oscuro o Gris Claro).
-                // No necesitamos que sea blanca con transparencia, necesitamos que sea del color del borde.
-                "white-alpha": "hsl(var(--border-color) / <alpha-value>)",
+                // AQUÍ ESTÁ LA MAGIA DEL BORDE:
+                // Usaremos 'border-border' en tus componentes.
+                border: "hsl(var(--border) / <alpha-value>)",
+
+                // Extras útiles para inputs y formularios premium
+                input: "hsl(var(--input) / <alpha-value>)",
+                ring: "hsl(var(--ring) / <alpha-value>)",
 
                 primary: {
                     DEFAULT: "hsl(var(--primary) / <alpha-value>)",
                     foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
                 },
 
-                // --- TREMOR COLORS (Originales) ---
+                // --- TREMOR COLORS (Intactos) ---
                 tremor: {
                     brand: {
                         faint: colors.blue[50],

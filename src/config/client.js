@@ -4,23 +4,19 @@ export const clientConfig = {
     // --- IDENTIDAD ---
     name: "La Cabrera",
     shortName: "Cabrera",
-    themeColor: '#ef4444',
+    themeColor: '#EF4178',
+    //#E8EF41
+    //#EF4178
+    //#0AD3A4
+    //#F97316
     currency: "$",
     locale: "es-AR",
 
-    // --- LÓGICA DE NEGOCIO (CORE) ---
+    // --- (CORE) ---
     businessLogic: {
-        maxCapacityPax: 210,
+        maxCapacityPax: 3000,
         totalTables: 25,
-
-        // ALGORITMO DE TIEMPO:
-        // averageTicketTimeMinutes: Este valor es la SEMILLA inicial.
-        // Con el tiempo, el backend lo sobrescribirá con el real calculado.
         averageTicketTimeMinutes: 90,
-
-        // MODALIDAD DE SERVICIO:
-        // 'split': Muestra tabs para Mediodía / Noche.
-        // 'continuous': Muestra una línea de tiempo única.
         serviceMode: 'split',
 
         shifts: {

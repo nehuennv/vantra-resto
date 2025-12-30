@@ -24,11 +24,11 @@ export const ThemeProvider = ({ children }) => {
 
     // 2. ESTADOS (Persistentes)
     const [soundEnabled, setSoundEnabled] = useState(() => getStorage('vantra_sound', true));
-    const [themeMode, setThemeMode] = useState(() => getStorage('vantra_theme_mode', 'dark')); // <--- ESTO FALTABA
+    const [themeMode, setThemeMode] = useState(() => getStorage('vantra_theme_mode', 'dark'));
     const [fontSize, setFontSize] = useState(() => getStorage('vantra_fontsize', 100));
     const [highContrast, setHighContrast] = useState(() => getStorage('vantra_contrast', false));
 
-    // 3. ALGORITMO AURA DUAL (Aquí arreglamos los bordes)
+    // 3. ALGORITMO AURA DUAL (Fix de variables)
     useEffect(() => {
         const root = document.documentElement;
 
@@ -40,36 +40,56 @@ export const ThemeProvider = ({ children }) => {
         root.style.setProperty('--primary', primaryHsl);
         root.style.setProperty('--primary-foreground', foregroundHsl);
 
+        // El anillo de foco (Ring) suele ser el color primario con opacidad o similar
+        root.style.setProperty('--ring', primaryHsl);
+
         if (themeMode === 'light') {
             // --- MODO CLARO ---
-            // Fondo casi blanco (98% luz)
-            root.style.setProperty('--background', `${h} 20% 98%`);
-            // Sidebar un pelín más oscuro para contraste (95% luz)
-            root.style.setProperty('--sidebar', `${h} 15% 95%`);
-            // Texto oscuro (10% luz)
-            root.style.setProperty('--foreground', `${h} 40% 10%`);
-            // BORDES: Gris suave (88% luz) -> Si esto fuera blanco, no se vería
-            root.style.setProperty('--border-color', `${h} 10% 88%`);
-
             root.classList.remove('dark');
             root.classList.add('light');
-        } else {
-            // --- MODO OSCURO ---
-            // Fondo oscuro (5% luz)
-            root.style.setProperty('--background', `${h} 12% 5%`);
-            // Sidebar un pelín más claro (8% luz)
-            root.style.setProperty('--sidebar', `${h} 12% 8%`);
-            // Texto claro (98% luz)
-            root.style.setProperty('--foreground', `${h} 10% 98%`);
-            // BORDES: Gris oscuro (15% luz). AQUÍ ESTÁ LA CLAVE.
-            // Si esto se pone muy alto, los bordes brillan. 15% es sutil.
-            root.style.setProperty('--border-color', `${h} 15% 15%`);
 
+            // Fondo casi blanco (96% luz, matiz de marca) - No tan blanco puro (#FFF)
+            root.style.setProperty('--background', `${h} 20% 96%`);
+
+            // Texto oscuro
+            root.style.setProperty('--foreground', `${h} 40% 10%`);
+
+            // Elementos secundarios (Sidebars/Cards suaves) -> Usamos --muted
+            root.style.setProperty('--muted', `${h} 15% 96%`);
+            root.style.setProperty('--muted-foreground', `${h} 10% 40%`);
+
+            // BORDES & INPUTS: 
+            // Gris suave (90% luz) para que se note sobre blanco pero no ensucie.
+            // Sincronizamos --border y --input
+            const borderVal = `${h} 15% 90%`;
+            root.style.setProperty('--border', borderVal);
+            root.style.setProperty('--input', borderVal);
+
+        } else {
+            // --- MODO OSCURO (Vantra Premium) ---
             root.classList.remove('light');
             root.classList.add('dark');
+
+            // Fondo profundo (5% luz)
+            root.style.setProperty('--background', `${h} 30% 6%`);
+
+            // Texto claro
+            root.style.setProperty('--foreground', `${h} 10% 98%`);
+
+            // Elementos secundarios (Sidebar/Cards) -> Un poco más claros que el fondo (10% luz)
+            root.style.setProperty('--muted', `${h} 25% 10%`);
+            root.style.setProperty('--muted-foreground', `${h} 10% 70%`);
+
+            // BORDES & INPUTS (EL FIX FINAL):
+            // Usamos un valor sólido pero oscuro (18% luz).
+            // Visualmente funciona como una línea translúcida sobre el fondo negro.
+            // NO usamos opacidad aquí, usamos un color "computed" para evitar superposiciones raras.
+            const borderVal = `${h} 20% 18%`;
+            root.style.setProperty('--border', borderVal);
+            root.style.setProperty('--input', borderVal);
         }
 
-    }, [theme.color, themeMode]); // Se ejecuta cuando cambia el color O el modo
+    }, [theme.color, themeMode]);
 
     // 4. PERSISTENCIA
     useEffect(() => { localStorage.setItem('vantra_sound', JSON.stringify(soundEnabled)); }, [soundEnabled]);
@@ -92,6 +112,7 @@ export const ThemeProvider = ({ children }) => {
         const newState = !soundEnabled;
         setSoundEnabled(newState);
         if (newState) {
+            // Nota: Asegúrate de que este sonido exista o cámbialo por uno local
             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
             audio.volume = 0.2;
             audio.play().catch(e => console.log("Audio play blocked", e));
