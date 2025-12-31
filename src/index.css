@@ -4,30 +4,36 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- RESET GLOBAL --- */
+/* --- RESET GLOBAL & OPTIMIZACIONES --- */
+:root {
+  /* Scroll suave en toda la app */
+  scroll-behavior: smooth;
+}
+
 *,
 *::before,
 *::after {
   -webkit-tap-highlight-color: transparent;
-  /* Elimina flash azul/gris en móviles */
+  /* Adiós flash azul en móvil */
+  /* UX Premium: Bordes más suaves en renderizado */
+  border-collapse: collapse;
 }
 
+/* --- FIX: BORDES DESAPARECIDOS ---
+   Eliminé 'border-color: transparent' y 'box-shadow: none' del *:active 
+   para que tus botones y inputs no pierdan estilo al hacer click.
+*/
 *:focus,
-*:focus-visible,
-*:active {
+*:focus-visible {
   outline: none !important;
-  box-shadow: none !important;
-  ring: 0 !important;
-  border-color: transparent !important;
-  /* Si algún borde cambia de color por defecto */
 }
 
-/* Revertir border-color transparente para inputs que si lo necesiten */
+/* Solo quitamos el outline nativo feo, pero respetamos tus bordes y rings de Tailwind */
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: hsl(var(--primary)) !important;
-  /* Devolvemos el control a los inputs reales */
+  outline: none !important;
+  /* El color del borde lo maneja Tailwind con 'focus:border-primary' */
 }
 
 @layer base {
@@ -36,7 +42,7 @@ select:focus {
     --background: 0 0% 100%;
     /* Blanco Puro */
     --foreground: 222.2 84% 4.9%;
-    /* Slate 950 (Casi negro) */
+    /* Slate 950 */
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -45,7 +51,7 @@ select:focus {
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 221.2 83.2% 53.3%;
-    /* Azul Vibrante (Brand) */
+    /* Azul Vibrante */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -60,7 +66,6 @@ select:focus {
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    /* EL SECRETO LIGHT: Un gris suave (Slate 200) para separar secciones */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
@@ -69,21 +74,17 @@ select:focus {
   }
 
   .dark {
-    /* --- VANTRA DARK MODE (Premium, Disruptivo, Glass) --- */
+    /* --- VANTRA DARK MODE (Premium) --- */
     --background: 222 47% 11%;
-    /* Tu Slate 900 Profundo */
     --foreground: 210 40% 98%;
-    /* Blanco hueso */
 
     --card: 222 47% 11%;
-    /* Mismo que bg para efecto clean */
     --card-foreground: 210 40% 98%;
 
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 217 91% 60%;
-    /* Tu Azul Eléctrico */
     --primary-foreground: 222 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -98,9 +99,6 @@ select:focus {
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    /* EL SECRETO DARK: Un gris oscuro casi azulado. 
-       Visualmente parece una línea blanca al 10% de opacidad, 
-       pero es un color sólido que no brilla en exceso. */
     --border: 217 32% 17%;
     --input: 217 32% 17%;
     --ring: 224.3 76.3% 48%;
@@ -110,12 +108,18 @@ select:focus {
 /* --- ESTILOS BASE DEL BODY --- */
 body {
   @apply bg-background text-foreground font-sans antialiased;
-  /* Transición suave de colores al cambiar de tema */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  /* Renderizado de fuentes HD para Mac/iOS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* Transición optimizada: Evita animar 'all', solo lo necesario */
+  transition-property: background-color, color;
+  transition-duration: 300ms;
+  transition-timing-function: ease-in-out;
 }
 
-/* --- GRADIENTE SOLO PARA MODO OSCURO --- */
-/* Mantenemos tu background disruptivo, pero solo en dark mode para no ensuciar el light mode */
+/* --- BACKGROUND DARK MODE --- */
 .dark body {
   background-color: hsl(222, 47%, 11%);
   background-image:
@@ -126,61 +130,80 @@ body {
   background-size: cover;
 }
 
-/* --- SCROLLBARS --- */
-/* Optimizados para verse bien en ambos modos */
+/* --- SCROLLBARS PREMIUM (GLOBAL) --- 
+  Esto arregla que se vean toscas en Windows/Linux 
+*/
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  /* Más fina (era 6px) */
+  height: 5px;
+  /* Para scroll horizontal */
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
+  /* Invisible */
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-white/10;
-  /* Gris en light, Translucido en dark */
+  @apply bg-gray-300/80 dark:bg-slate-700/50;
   border-radius: 10px;
+  /* Borde transparente para dar efecto de "flotando" */
+  border: 1px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-white/20;
+  @apply bg-gray-400 dark:bg-slate-600;
 }
 
-/* Firefox */
+/* Firefox Support */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
-  /* Usa la variable de borde adaptativa */
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
+/* --- UTILITIES --- */
 @layer utilities {
 
-  /* Ocultar scrollbar en Chrome/Safari/Opera */
+  /* Ocultar scrollbar pero permitir scroll */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
-  /* Ocultar scrollbar en IE, Edge y Firefox */
   .no-scrollbar {
     -ms-overflow-style: none;
-    /* IE and Edge */
+    /* IE/Edge */
     scrollbar-width: none;
     /* Firefox */
+  }
+
+  /* --- CLASE ESPECIAL PARA CONTENEDORES INTERNOS ---
+    Usa esto en tu 'ReservationsPage' en el div que hace overflow.
+    Ej: <div className="overflow-y-auto custom-scrollbar ...">
+  */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    /* Aún más sutil para áreas internas */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 dark:bg-white/10;
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-300 dark:bg-white/20;
+  }
+}
+
+/* Animaciones */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }
