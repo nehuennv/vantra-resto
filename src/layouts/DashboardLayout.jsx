@@ -296,7 +296,7 @@ const DashboardLayout = () => {
 
 const pathnameToTitle = (path) => {
     if (path === "/") return "Visión General";
-    if (path === "/reservations") return "Gestión de Sala & Reservas";
+    if (path === "/reservations") return "Gestión de Reservas";
     return "Sistema Vantra";
 };
 

@@ -88,7 +88,7 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                             "border rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden relative z-10 flex flex-col transition-all duration-300",
                             themeMode === 'light'
                                 ? "bg-white border-gray-100" // Clean White Mode
-                                : "bg-card border-border" // Solid Dark Mode
+                                : "bg-neutral-900 border-border shadow-2xl" // Solid Dark Mode
                         )}
                         onClick={(e) => e.stopPropagation()}
                     >
