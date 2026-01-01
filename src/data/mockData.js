@@ -201,6 +201,14 @@ initialReservations.push({
     createdAt: getDateOffset(-3)
 });
 
+// RESERVAS FINALIZADAS HOY (Para probar filtros y scroll)
+for (let i = 0; i < 8; i++) {
+    const r = generarReserva(reservaId++, 0, 'almuerzo');
+    r.status = 'finished';
+    r.time = getRandomTime(12, 13); // Finalizaron temprano
+    initialReservations.push(r);
+}
+
 initialReservations.push({
     id: reservaId++,
     name: "Cena Empresarial Tech",

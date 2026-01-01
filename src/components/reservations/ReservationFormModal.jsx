@@ -67,18 +67,18 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
 
                     {/* MODAL CARD */}
                     <motion.div
-                        className="bg-[#0F0F10] border border-white/10 w-full max-w-md rounded-2xl shadow-2xl relative z-10 flex flex-col overflow-hidden"
+                        className="bg-card border border-border w-full max-w-md rounded-2xl shadow-2xl relative z-10 flex flex-col overflow-hidden"
                         variants={modalVariants}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="px-6 py-4 border-b border-white/5 bg-[#131316] flex justify-between items-center shrink-0">
-                            <h2 className="text-lg font-bold text-white tracking-wide">
+                        <div className="px-6 py-4 border-b border-border bg-muted/40 flex justify-between items-center shrink-0">
+                            <h2 className="text-lg font-bold text-foreground tracking-wide">
                                 {initialData ? "Editar Reserva" : "Nueva Reserva"}
                             </h2>
                             <button
                                 onClick={onClose}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-colors outline-none focus:outline-none focus:ring-0"
+                                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors outline-none focus:outline-none focus:ring-0"
                             >
                                 <X size={20} />
                             </button>
@@ -90,25 +90,25 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                             {/* Fila 1: Fecha y Hora */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
                                         <Calendar size={10} /> Fecha
                                     </label>
                                     <input
                                         type="date"
                                         required
-                                        className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-slate-600 color-scheme-dark"
+                                        className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground"
                                         value={formData.date}
                                         onChange={e => setFormData({ ...formData, date: e.target.value })}
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
                                         <Clock size={10} /> Hora
                                     </label>
                                     <input
                                         type="time"
                                         required
-                                        className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors color-scheme-dark"
+                                        className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors"
                                         value={formData.time}
                                         onChange={e => setFormData({ ...formData, time: e.target.value })}
                                     />
@@ -117,14 +117,14 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
 
                             {/* Nombre */}
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
                                     <User size={10} /> Nombre del Cliente
                                 </label>
                                 <input
                                     autoFocus
                                     type="text"
                                     required
-                                    className="w-full bg-[#18181b] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-slate-700 font-medium"
+                                    className="w-full bg-input border border-border rounded-xl px-4 py-3 text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground font-medium"
                                     placeholder="Ej: Juan Pérez"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -134,25 +134,25 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                             {/* Fila 2: Pax y Origen */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
                                         <Users size={10} /> Personas
                                     </label>
                                     <input
                                         type="number"
                                         min="1"
                                         required
-                                        className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors font-mono"
+                                        className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors font-mono"
                                         value={formData.pax}
                                         onChange={e => setFormData({ ...formData, pax: parseInt(e.target.value) })}
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
                                         <Globe size={10} /> Origen
                                     </label>
                                     <div className="relative">
                                         <select
-                                            className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors appearance-none cursor-pointer"
+                                            className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors appearance-none cursor-pointer"
                                             value={formData.origin}
                                             onChange={e => setFormData({ ...formData, origin: e.target.value })}
                                         >
@@ -162,7 +162,7 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                                             <option value="web">Sitio Web</option>
                                         </select>
                                         {/* Flecha custom para el select */}
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                                             <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
@@ -173,12 +173,12 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
 
                             {/* Teléfono */}
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
                                     <Phone size={10} /> Teléfono (Opcional)
                                 </label>
                                 <input
                                     type="tel"
-                                    className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-slate-700 font-mono"
+                                    className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground font-mono"
                                     placeholder="+54 9 11..."
                                     value={formData.phone}
                                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
@@ -187,12 +187,12 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
 
                             {/* Notas */}
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
                                     <FileText size={10} /> Notas Adicionales
                                 </label>
                                 <textarea
                                     rows="2"
-                                    className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors resize-none placeholder:text-slate-700"
+                                    className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors resize-none placeholder:text-muted-foreground"
                                     placeholder="Alergias, mesa preferida, cumpleaños..."
                                     value={formData.notes}
                                     onChange={e => setFormData({ ...formData, notes: e.target.value })}

@@ -8,15 +8,26 @@ import {
     ChevronLeft,
     Bell,
     Plus,
-    Clock
+    Clock,
+    User
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "../lib/utils";
+import { cn } from "../lib/utils"; // Asegurate que esta ruta sea correcta
 import SettingsPanel from "../components/SettingsPanel";
 import BrandLogo from "../components/ui/BrandLogo";
 import { useTheme } from "../context/ThemeContext";
 import ReservationFormModal from "../components/reservations/ReservationFormModal";
 import { useReservations } from "../context/ReservationsContext";
+
+// --- CONFIGURACIÓN DE ANIMACIONES ---
+// Extraemos esto para mantener el código limpio y consistente.
+const springTransition = {
+    type: "spring",
+    stiffness: 300,
+    damping: 30
+};
+
+// --- COMPONENTES AUXILIARES ---
 
 const LiveClock = () => {
     const [time, setTime] = useState(new Date());
@@ -26,15 +37,16 @@ const LiveClock = () => {
     }, []);
 
     return (
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border text-muted-foreground">
-            <Clock size={15} className="text-primary" />
-            <span className="text-sm font-semibold text-foreground tabular-nums tracking-tight">
+        <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-background/50 border border-border/50 text-muted-foreground shadow-sm backdrop-blur-sm">
+            <Clock size={14} className="text-primary" />
+            <span className="text-xs font-bold text-foreground tabular-nums tracking-wide">
                 {time.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
             </span>
         </div>
     );
 };
 
+// Item del Menú: Soluciona el problema de centrado forzando una estructura rígida
 const SidebarItem = ({ to, icon: Icon, label, isCollapsed }) => {
     const location = useLocation();
     const isActive = location.pathname === to;
@@ -43,46 +55,129 @@ const SidebarItem = ({ to, icon: Icon, label, isCollapsed }) => {
         <NavLink
             to={to}
             className={cn(
-                "relative flex items-center h-12 mb-1 transition-colors rounded-xl group outline-none overflow-hidden",
-                isActive ? "text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                "relative flex items-center h-12 mb-2 transition-all duration-300 rounded-xl group outline-none",
+                // Si está colapsado, centramos el contenido (el icono). Si no, alineación standard.
+                isCollapsed ? "justify-center px-0" : "px-3",
+                isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
             )}
         >
+            {/* Fondo Activo (Pill) con animación Layout para suavidad extrema */}
             {isActive && (
                 <motion.div
                     layoutId="active-pill"
-                    className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-xl"
+                    className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.05)]"
                     initial={false}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    transition={springTransition}
                 />
             )}
 
-            <div className="flex items-center w-full z-10">
-                {/* W-10 (40px) Fijo para alinearse con el Logo */}
-                <div className="flex items-center justify-center w-10 h-10 shrink-0">
-                    <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} className="transition-transform duration-300 group-hover:scale-110" />
-                </div>
-
-                <div className="flex-1 overflow-hidden h-full flex items-center">
-                    <motion.span
-                        initial={false}
-                        animate={{
-                            width: isCollapsed ? 0 : "auto",
-                            opacity: isCollapsed ? 0 : 1,
-                            marginLeft: isCollapsed ? 0 : 8
-                        }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="text-sm font-medium whitespace-nowrap overflow-hidden pl-1"
-                    >
-                        {label}
-                    </motion.span>
-                </div>
+            {/* Contenedor del Icono: SIEMPRE de ancho fijo para evitar saltos visuales */}
+            <div className="relative z-10 flex items-center justify-center w-10 h-10 shrink-0">
+                <Icon
+                    size={20}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className={cn(
+                        "transition-transform duration-300",
+                        isActive ? "scale-110" : "group-hover:scale-110"
+                    )}
+                />
             </div>
+
+            {/* Contenedor del Texto: Animamos ancho y opacidad */}
+            <div className={cn("relative z-10 overflow-hidden", isCollapsed ? "w-0 flex-none" : "flex-1")}>
+                <motion.div
+                    initial={false}
+                    animate={{
+                        width: isCollapsed ? 0 : "auto",
+                        opacity: isCollapsed ? 0 : 1,
+                        x: isCollapsed ? -10 : 0
+                    }}
+                    transition={{
+                        width: springTransition,
+                        x: springTransition,
+                        opacity: { duration: 0.2, delay: isCollapsed ? 0 : 0.15 }
+                    }}
+                    className={cn("whitespace-nowrap", isCollapsed ? "pl-0" : "pl-2")}
+                >
+                    <span className="text-sm tracking-tight">{label}</span>
+                </motion.div>
+            </div>
+
+            {/* Tooltip simple para cuando está colapsado (Mejora UX) */}
+            {isCollapsed && (
+                <div className="absolute left-full ml-4 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl">
+                    {label}
+                </div>
+            )}
         </NavLink>
     );
 };
 
+// Componente de Perfil de Admin Refactorizado
+const AdminProfile = ({ isCollapsed, onClick }) => {
+    return (
+        <div
+            onClick={onClick}
+            className={cn(
+                "mt-auto border-t border-border/60 bg-background/30 backdrop-blur-md cursor-pointer transition-colors hover:bg-muted/50 group overflow-hidden",
+                isCollapsed ? "p-3 flex justify-center" : "p-4"
+            )}
+        >
+            <div className={cn("flex items-center transition-all", isCollapsed ? "justify-center gap-0" : "gap-3")}>
+                {/* Avatar */}
+                <div className="relative shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20 shadow-lg group-hover:border-primary/50 transition-colors">
+                        <User size={18} className="text-primary" />
+                    </div>
+                    {/* Indicador Online */}
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-background rounded-full"></span>
+                </div>
+
+                {/* Info Text - Se oculta suavemente */}
+                <motion.div
+                    animate={{
+                        width: isCollapsed ? 0 : "auto",
+                        opacity: isCollapsed ? 0 : 1,
+                    }}
+                    transition={{
+                        width: springTransition,
+                        opacity: { duration: 0.2, delay: isCollapsed ? 0 : 0.15 }
+                    }}
+                    className="flex flex-col overflow-hidden whitespace-nowrap"
+                >
+                    <span className="text-sm font-bold text-foreground leading-none mb-1">
+                        Admin Vantra
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                        Gerente General
+                    </span>
+                </motion.div>
+
+                <motion.button
+                    animate={{
+                        width: isCollapsed ? 0 : "auto",
+                        opacity: isCollapsed ? 0 : 1,
+                        scale: isCollapsed ? 0 : 1
+                    }}
+                    className={cn(
+                        "text-muted-foreground hover:text-red-500 transition-colors",
+                        isCollapsed ? "w-0 p-0 overflow-hidden" : "ml-auto p-2"
+                    )}
+                >
+                    <LogOut size={16} />
+                </motion.button>
+            </div>
+        </div>
+    );
+};
+
+// --- LAYOUT PRINCIPAL ---
+
 const DashboardLayout = () => {
+    // Estado del sidebar
     const [isCollapsed, setIsCollapsed] = useState(false);
+
+    // Modales y Paneles
     const [showSettings, setShowSettings] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalInitialData, setModalInitialData] = useState(null);
@@ -91,6 +186,7 @@ const DashboardLayout = () => {
     const { clientConfig } = useTheme();
     const { selectedDate, addReservation, updateReservation } = useReservations();
 
+    // --- MANEJO DE MODALES ---
     const handleOpenModal = (data = null) => {
         setModalInitialData(data || { name: '', pax: 2, time: '', origin: 'walk-in', notes: '', phone: '', date: selectedDate });
         setIsModalOpen(true);
@@ -108,192 +204,172 @@ const DashboardLayout = () => {
         handleCloseModal();
     };
 
-    // --- VARIANTES DE ANIMACIÓN ---
-    const sidebarVariants = {
-        expanded: {
-            width: "260px",
-            paddingLeft: "24px",
-            paddingRight: "24px"
-        },
-        collapsed: {
-            width: "80px",
-            // CLAVE: 20px padding + 40px icono + 20px padding = 80px total.
-            // Esto centra matemáticamente el contenido sin usar justify-center.
-            paddingLeft: "20px",
-            paddingRight: "20px"
-        }
-    };
-
     return (
-        <div className="flex h-screen overflow-hidden bg-background text-foreground font-sans selection:bg-primary/30">
+        <div className="flex h-screen overflow-hidden bg-background text-foreground font-sans selection:bg-primary/20">
 
+            {/* SIDEBAR */}
             <motion.aside
                 initial={false}
-                animate={isCollapsed ? "collapsed" : "expanded"}
-                variants={sidebarVariants}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-40 flex flex-col h-full bg-background/95 backdrop-blur-xl border-r border-border shadow-2xl flex-shrink-0"
+                animate={{
+                    width: isCollapsed ? 80 : 280
+                }}
+                transition={springTransition}
+                className="relative z-40 flex flex-col h-full bg-background/95 backdrop-blur-2xl border-r border-border/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0"
             >
-                {/* 1. HEADER LOGO */}
-                {/* padding-bottom para separar, overflow-visible por si las dudas, pero con el padding interno basta */}
-                <div className="pt-6 pb-6 flex-shrink-0 min-h-[80px] flex items-center overflow-visible">
+                {/* 1. Header del Sidebar (Logo) */}
+                <div className={cn(
+                    "h-20 flex items-center transition-all duration-300",
+                    isCollapsed ? "justify-center" : "px-6"
+                )}>
                     <BrandLogo collapsed={isCollapsed} />
                 </div>
 
-                {/* 2. NAV SECTION */}
-                <div className="flex-1 py-4 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-1">
+                {/* 2. Navegación */}
+                <div className="flex-1 px-3 py-6 space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
 
+                    {/* Label de Sección (Solo visible expandido) */}
                     <motion.div
-                        initial={false}
-                        animate={{
-                            height: isCollapsed ? 0 : "auto",
-                            opacity: isCollapsed ? 0 : 1,
-                            marginBottom: isCollapsed ? 0 : 8
+                        animate={{ opacity: isCollapsed ? 0 : 1, height: isCollapsed ? 0 : "auto" }}
+                        transition={{
+                            height: springTransition,
+                            opacity: { duration: 0.2, delay: isCollapsed ? 0 : 0.15 }
                         }}
-                        className="overflow-hidden"
+                        className="mb-2 px-3 overflow-hidden"
                     >
-                        <h3 className="px-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
-                            Principal
+                        <h3 className="text-[10px] font-black text-muted-foreground/70 uppercase tracking-[0.2em] whitespace-nowrap">
+                            Plataforma
                         </h3>
                     </motion.div>
 
                     <SidebarItem to="/reservations" icon={CalendarClock} label="Reservas" isCollapsed={isCollapsed} />
                     <SidebarItem to="/" icon={LayoutDashboard} label="Estadísticas" isCollapsed={isCollapsed} />
 
-                    <div className="my-6 h-px bg-border w-full" />
+                    <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent w-full" />
 
-                    {/* Botón Settings */}
+                    {/* Botón Configuración (Reutilizando estilos de SidebarItem manualmente para mantener consistencia) */}
                     <button
                         onClick={() => setShowSettings(true)}
-                        className="w-full relative flex items-center h-12 transition-colors rounded-xl group overflow-hidden outline-none text-muted-foreground hover:bg-muted hover:text-foreground"
+                        className={cn(
+                            "w-full relative flex items-center h-12 rounded-xl group outline-none transition-colors",
+                            isCollapsed ? "justify-center" : "px-3 hover:bg-muted"
+                        )}
                     >
-                        <div className="flex items-center w-full z-10">
-                            <div className="flex items-center justify-center w-10 h-10 shrink-0">
-                                <Settings size={20} strokeWidth={1.5} />
-                            </div>
-                            <div className="flex-1 overflow-hidden h-full flex items-center">
-                                <motion.span
-                                    animate={{
-                                        width: isCollapsed ? 0 : "auto",
-                                        opacity: isCollapsed ? 0 : 1,
-                                        marginLeft: isCollapsed ? 0 : 8
-                                    }}
-                                    className="text-sm font-medium whitespace-nowrap overflow-hidden pl-1"
-                                >
-                                    Configuración
-                                </motion.span>
-                            </div>
+                        <div className="flex items-center justify-center w-10 h-10 shrink-0">
+                            <Settings size={20} className="text-muted-foreground group-hover:text-foreground group-hover:rotate-90 transition-all duration-500" />
                         </div>
-                    </button>
-                </div>
-
-                {/* 3. ADMIN FOOTER */}
-                <div className="p-0 mt-auto border-t border-border bg-background/50 flex-shrink-0 overflow-hidden">
-                    <div className="py-3">
-                        <div
-                            onClick={() => setShowSettings(true)}
-                            className="flex items-center h-12 rounded-xl transition-all hover:bg-muted cursor-pointer overflow-hidden relative group"
-                        >
-                            <div className="flex items-center justify-center w-10 h-10 shrink-0 z-20">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 border border-border flex items-center justify-center text-xs font-bold text-primary group-hover:border-primary/50 transition-colors">
-                                    AD
-                                </div>
-                            </div>
-
+                        <div className={cn("relative z-10 overflow-hidden text-left", isCollapsed ? "w-0 flex-none" : "flex-1")}>
                             <motion.div
                                 animate={{
                                     width: isCollapsed ? 0 : "auto",
                                     opacity: isCollapsed ? 0 : 1,
+                                    x: isCollapsed ? -10 : 0
                                 }}
-                                className="flex flex-1 items-center overflow-hidden pr-2 ml-2"
+                                transition={{
+                                    width: springTransition,
+                                    x: springTransition,
+                                    opacity: { duration: 0.2, delay: isCollapsed ? 0 : 0.15 }
+                                }}
+                                className={cn("whitespace-nowrap", isCollapsed ? "pl-0" : "pl-2")}
                             >
-                                <div className="flex flex-col min-w-[80px]">
-                                    <span className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">Administrador</span>
-                                    <span className="text-[10px] text-muted-foreground truncate">Gerente</span>
-                                </div>
-
-                                <div
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        console.log("Logout");
-                                    }}
-                                    className="ml-auto p-1.5 rounded-md hover:bg-red-500/10 hover:text-red-500 transition-colors text-muted-foreground"
-                                >
-                                    <LogOut size={16} />
-                                </div>
+                                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">Configuración</span>
                             </motion.div>
                         </div>
-                    </div>
+                    </button>
                 </div>
 
-                <button
+                {/* 3. Footer Admin (Reemplaza la versión anterior) */}
+                <AdminProfile isCollapsed={isCollapsed} onClick={() => setShowSettings(true)} />
+
+                {/* 4. Botón de Colapso (Flotante) */}
+                <motion.button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="absolute -right-3 top-12 z-50 flex items-center justify-center w-6 h-6 bg-background border border-border rounded-full text-muted-foreground hover:text-primary hover:border-primary transition-all shadow-md outline-none hover:scale-110 active:scale-95"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="absolute -right-3 top-[74px] -translate-y-1/2 z-50 flex items-center justify-center w-6 h-6 bg-background border border-border shadow-md rounded-full text-muted-foreground hover:text-primary transition-colors focus:outline-none"
                 >
                     <motion.div
                         animate={{ rotate: isCollapsed ? 180 : 0 }}
-                        transition={{ duration: 0.4 }}
+                        transition={{ duration: 0.3 }}
                     >
-                        <ChevronLeft size={12} />
+                        <ChevronLeft size={14} />
                     </motion.div>
-                </button>
+                </motion.button>
+
             </motion.aside>
 
-            {/* MAIN AREA (SIN CAMBIOS) */}
-            <main className="flex-1 relative flex flex-col min-w-0 overflow-hidden bg-background">
-                <header className="h-16 px-6 md:px-8 flex items-center justify-between border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-30">
-                    <div className="flex flex-col justify-center">
+            {/* MAIN AREA */}
+            <main className="flex-1 relative flex flex-col min-w-0 overflow-hidden bg-muted/5">
+
+                {/* Header Superior */}
+                <header className="h-20 px-8 flex items-center justify-between sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40">
+
+                    {/* Títulos Animados */}
+                    <div className="flex flex-col justify-center gap-0.5">
                         <AnimatePresence mode="wait">
                             <motion.h2
                                 key={location.pathname}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                                className="text-lg font-bold text-foreground font-jakarta tracking-tight"
+                                initial={{ opacity: 0, y: 10, filter: "blur(5px)" }}
+                                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                exit={{ opacity: 0, y: -10, filter: "blur(5px)" }}
+                                transition={{ duration: 0.3 }}
+                                className="text-xl font-bold text-foreground font-jakarta tracking-tight"
                             >
                                 {pathnameToTitle(location.pathname)}
                             </motion.h2>
                         </AnimatePresence>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium h-4">
-                            {clientConfig.branchName ? <span>{clientConfig.branchName}</span> : <span>{new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>}
+
+                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            {clientConfig.branchName || "Sucursal Central"}
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 md:gap-6">
+                    {/* Acciones del Header */}
+                    <div className="flex items-center gap-4">
                         <LiveClock />
-                        <div className="h-6 w-px bg-border hidden md:block"></div>
+
+                        <div className="h-8 w-px bg-border/60 mx-2 hidden md:block"></div>
+
+                        {/* Botón Nueva Reserva (Glow Effect) */}
                         <button
                             onClick={() => handleOpenModal()}
-                            className="group/btn relative hidden md:flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-xl text-sm font-bold overflow-hidden transition-all duration-300 hover:shadow-[0_0_15px_hsl(var(--primary)/0.5)] hover:scale-[1.01] border border-white/10 active:scale-[0.98]"
+                            className="group relative hidden md:flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_4px_14px_0_rgba(0,0,0,0.39)] hover:shadow-[0_6px_20px_rgba(var(--primary),0.23)] hover:-translate-y-[1px] transition-all duration-300 overflow-hidden"
                         >
-                            <div className="absolute inset-0 -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
-                            <Plus size={16} strokeWidth={3} className="relative z-20" />
-                            <span className="relative z-20">Nueva Reserva</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
+                            <Plus size={18} strokeWidth={2.5} />
+                            <span>Nueva Reserva</span>
                         </button>
+
+                        {/* Botón Mobile */}
                         <button onClick={() => handleOpenModal()} className="md:hidden flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg">
                             <Plus size={20} strokeWidth={3} />
                         </button>
-                        <button className="relative text-muted-foreground hover:text-foreground transition-colors outline-none p-2 rounded-full hover:bg-muted">
+
+                        {/* Notificaciones */}
+                        <button className="relative p-2.5 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200">
                             <Bell size={20} />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+                            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-background"></span>
                         </button>
                     </div>
                 </header>
 
+                {/* Contenido Dinámico */}
                 <div className="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth custom-scrollbar">
-                    <div className="max-w-[1920px] mx-auto animate-in fade-in zoom-in-95 duration-300">
+                    <div className="max-w-[1920px] mx-auto">
                         <Outlet context={{ openModal: handleOpenModal }} />
                     </div>
                 </div>
+
             </main>
 
+            {/* Modales */}
             <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
             <ReservationFormModal isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleModalSubmit} initialData={modalInitialData} />
         </div>
     );
 };
 
+// Helper para títulos
 const pathnameToTitle = (path) => {
     if (path === "/") return "Visión General";
     if (path === "/reservations") return "Gestión de Reservas";

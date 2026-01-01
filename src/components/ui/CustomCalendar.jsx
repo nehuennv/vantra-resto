@@ -86,9 +86,7 @@ const CustomCalendar = ({ isOpen, onClose, selectedDate, onSelect, themeColor = 
                         transition={{ type: "spring", stiffness: 300, damping: 25, duration: 0.3 }}
                         className={cn(
                             "border rounded-2xl shadow-2xl w-full max-w-[340px] overflow-hidden relative z-10 flex flex-col transition-all duration-300",
-                            themeMode === 'light'
-                                ? "bg-white border-gray-100" // Clean White Mode
-                                : "bg-neutral-900 border-border shadow-2xl" // Solid Dark Mode
+                            "bg-card border-border" // Unificado para Light y Dark (Hereda tema)
                         )}
                         onClick={(e) => e.stopPropagation()}
                     >

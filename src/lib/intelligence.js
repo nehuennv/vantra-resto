@@ -195,7 +195,6 @@ export const analyzeOperations = (metrics) => {
         });
     }
 
-    // Caso Borde: Sin Datos
     if (!hasData) {
         return {
             healthScore: 100,

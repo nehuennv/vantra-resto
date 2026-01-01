@@ -1,47 +1,38 @@
 import React from "react";
-import { UtensilsCrossed } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Hexagon } from "lucide-react"; // O el icono que uses
 import { cn } from "../../lib/utils";
-import { useTheme } from "../../context/ThemeContext";
 
-const BrandLogo = ({ collapsed }) => {
-    const { clientConfig } = useTheme();
-
+const BrandLogo = ({ collapsed = false }) => {
     return (
-        // Quitamos justify-center. Dejamos que el padding del padre (DashboardLayout) controle la posición.
-        <div className="relative flex items-center w-full overflow-hidden">
-
-            {/* 1. EL ÍCONO */}
-            {/* Usamos w-10 h-10 (40px) EXACTOS para coincidir con los botones del sidebar */}
-            {/* Quitamos sombras rojas y fondos fuertes. Solo el logo limpio. */}
-            <div className="flex items-center justify-center w-10 h-10 shrink-0 z-20">
-                {clientConfig.logo ? (
-                    <img
-                        src={clientConfig.logo}
-                        alt="Logo"
-                        className="w-full h-full object-cover rounded-xl"
-                    />
-                ) : (
-                    // Si no hay logo, mostramos el ícono en el color primario, simple.
-                    <div className="flex items-center justify-center w-full h-full bg-primary/10 rounded-xl text-primary">
-                        <UtensilsCrossed size={22} strokeWidth={2.5} />
-                    </div>
-                )}
+        <div className={cn(
+            "relative flex items-center h-12 transition-all duration-500",
+            collapsed ? "justify-center w-full px-0" : "justify-start gap-3 px-2"
+        )}>
+            {/* ICONO - Siempre visible, pero ajusta tamaño sutilmente */}
+            <div className="relative z-10 flex items-center justify-center shrink-0">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 text-primary-foreground">
+                    <Hexagon size={24} strokeWidth={2.5} className="fill-white/20" />
+                </div>
             </div>
 
-            {/* 2. EL TEXTO */}
+            {/* TEXTO - Se oculta suavemente con AnimatePresence */}
             <AnimatePresence>
                 {!collapsed && (
                     <motion.div
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: "auto" }}
-                        exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex flex-col ml-3 overflow-hidden whitespace-nowrap"
+                        initial={{ opacity: 0, x: -10, width: 0 }}
+                        animate={{ opacity: 1, x: 0, width: "auto" }}
+                        exit={{ opacity: 0, x: -10, width: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="flex flex-col justify-center overflow-hidden whitespace-nowrap"
                     >
-                        <h1 className="text-lg font-bold tracking-tight text-foreground leading-none">
-                            {clientConfig.name || "Vantra"}
-                        </h1>
+                        <span className="font-bold text-lg tracking-tight leading-none text-foreground">
+                            Vantra
+                            <span className="text-primary">.</span>
+                        </span>
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest leading-none mt-0.5">
+                            Resto Manager
+                        </span>
                     </motion.div>
                 )}
             </AnimatePresence>

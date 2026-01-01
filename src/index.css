@@ -44,64 +44,98 @@ select:focus {
     --foreground: 222.2 84% 4.9%;
     /* Slate 950 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* --- SISTEMA DE COLOR ADAPTATIVO (Aura) --- */
+    /* Estos valores son SOBREESCRITOS automáticamente por src/lib/theme.js basado en client.js */
+    /* Valores por defecto (Fallback) */
+    --base-hue: 220;
+    --base-sat: 80%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* --- LIGHT MODE (Tinta suave) --- */
+    --background: var(--base-hue) 30% 99%;
+    --foreground: var(--base-hue) 50% 10%;
 
-    --primary: 221.2 83.2% 53.3%;
-    /* Azul Vibrante */
+    --card: var(--base-hue) 30% 97%;
+    --card-foreground: var(--base-hue) 50% 10%;
+
+    --popover: var(--base-hue) 30% 99%;
+    --popover-foreground: var(--base-hue) 50% 10%;
+
+    --primary: var(--base-hue) var(--base-sat) 60%;
+    --primary-light: var(--base-hue) var(--base-sat) 75%;
+    /* Tono Complementario Claro */
+    --primary-dark: var(--base-hue) var(--base-sat) 45%;
+    /* Tono Complementario Oscuro */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: var(--base-hue) 20% 94%;
+    --secondary-foreground: var(--base-hue) 50% 10%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: var(--base-hue) 20% 94%;
+    --muted-foreground: var(--base-hue) 10% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: var(--base-hue) 20% 92%;
+    --accent-foreground: var(--base-hue) 50% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --border: var(--base-hue) 20% 90%;
+    --input: var(--base-hue) 20% 90%;
+    --ring: var(--base-hue) var(--base-sat) 60%;
 
     --radius: 0.5rem;
+
+    /* Variables de Gráficos (Shadcn Charts) */
+    --chart-1: var(--base-hue) var(--base-sat) 60%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 
   .dark {
-    /* --- VANTRA DARK MODE (Premium) --- */
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    /* --- DARK MODE (Deep Tinted Aura) --- */
+    /* El fondo NO es negro ni gris, es un tono muy oscuro de tu color principal */
 
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    --background: var(--base-hue) 40% 6%;
+    /* Fondo profundo con tinte */
+    --foreground: var(--base-hue) 10% 98%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    --card: var(--base-hue) 35% 10%;
+    /* Tarjetas apenas más claras */
+    --card-foreground: var(--base-hue) 10% 98%;
 
-    --primary: 217 91% 60%;
+    --popover: var(--base-hue) 35% 9%;
+    --popover-foreground: var(--base-hue) 10% 98%;
+
+    --primary: var(--base-hue) var(--base-sat) 60%;
+    --primary-light: var(--base-hue) var(--base-sat) 75%;
+    --primary-dark: var(--base-hue) var(--base-sat) 45%;
     --primary-foreground: 222 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: var(--base-hue) 30% 15%;
+    --secondary-foreground: var(--base-hue) 10% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: var(--base-hue) 30% 15%;
+    --muted-foreground: var(--base-hue) 20% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: var(--base-hue) 30% 20%;
+    --accent-foreground: var(--base-hue) 10% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 224.3 76.3% 48%;
+    --border: var(--base-hue) 30% 20%;
+    /* Bordes sutiles tintados */
+    --input: var(--base-hue) 30% 20%;
+    --ring: var(--base-hue) var(--base-sat) 60%;
+
+    /* Variables de Gráficos Dark Mode */
+    --chart-1: var(--base-hue) var(--base-sat) 60%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -113,42 +147,40 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 
-  /* Transición optimizada: Evita animar 'all', solo lo necesario */
+  /* Transición optimizada */
   transition-property: background-color, color;
   transition-duration: 300ms;
   transition-timing-function: ease-in-out;
 }
 
-/* --- BACKGROUND DARK MODE --- */
+/* --- BACKGROUND DARK MODE (DYNAMIC GLOW) --- */
 .dark body {
-  background-color: hsl(222, 47%, 11%);
+  /* Fondo base tintado */
+  background-color: hsl(var(--background));
+
+  /* Gradientes de "Aura" usando el mismo matiz */
   background-image:
-    radial-gradient(circle at 0% 0%, rgba(20, 20, 30, 1) 0%, transparent 50%),
-    radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 100% 0%, rgba(244, 63, 94, 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 60%),
+    radial-gradient(circle at 0% 0%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.1) 0%, transparent 50%);
   background-attachment: fixed;
   background-size: cover;
 }
 
-/* --- SCROLLBARS PREMIUM (GLOBAL) --- 
-  Esto arregla que se vean toscas en Windows/Linux 
-*/
+/* --- SCROLLBARS PREMIUM (GLOBAL) --- */
 ::-webkit-scrollbar {
   width: 5px;
-  /* Más fina (era 6px) */
+  /* Más fina */
   height: 5px;
-  /* Para scroll horizontal */
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
-  /* Invisible */
 }
 
 ::-webkit-scrollbar-thumb {
   @apply bg-gray-300/80 dark:bg-slate-700/50;
   border-radius: 10px;
-  /* Borde transparente para dar efecto de "flotando" */
   border: 1px solid transparent;
   background-clip: content-box;
 }
@@ -160,7 +192,7 @@ body {
 /* Firefox Support */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: hsl(var(--border)) transparent;
 }
 
 /* --- UTILITIES --- */
@@ -178,13 +210,9 @@ body {
     /* Firefox */
   }
 
-  /* --- CLASE ESPECIAL PARA CONTENEDORES INTERNOS ---
-    Usa esto en tu 'ReservationsPage' en el div que hace overflow.
-    Ej: <div className="overflow-y-auto custom-scrollbar ...">
-  */
+  /* --- CLASE ESPECIAL PARA CONTENEDORES INTERNOS --- */
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
-    /* Aún más sutil para áreas internas */
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {

@@ -4,7 +4,7 @@ export const clientConfig = {
     // --- IDENTIDAD ---
     name: "La Cabrera",
     shortName: "Cabrera",
-    themeColor: '#0AD3A4',
+    themeColor: '#F97316',
     //#E8EF41
     //#EF4178
     //#0AD3A4
@@ -14,7 +14,7 @@ export const clientConfig = {
 
     // --- (CORE) ---
     businessLogic: {
-        maxCapacityPax:400,
+        maxCapacityPax: 400,
         totalTables: 25,
         averageTicketTimeMinutes: 90,
         serviceMode: 'split',

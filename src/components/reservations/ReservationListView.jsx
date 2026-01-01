@@ -114,10 +114,9 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
             layout
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            onClick={() => { onClick(res.id); setConfirmAction(null); }}
             className={cn(
-                "group relative w-full overflow-hidden transition-all duration-200 cursor-pointer",
-                "bg-card border rounded-lg mb-3 shadow-sm", // Rounded standard, no exagerado
+                "group relative w-full overflow-hidden transition-all duration-200", // Quitamos cursor-pointer global
+                "bg-card border rounded-lg shadow-sm hover:z-10", // Added hover:z-10 para que no se corte el efecto
                 "border-l-[4px]", // Borde indicador sólido pero no invasivo
                 style.borderLeft,
                 isSelected
@@ -126,7 +125,11 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
             )}
         >
             {/* --- GRID ESTRUCTURAL (Layout Fijo) --- */}
-            <div className="grid grid-cols-[auto_1fr_auto] gap-4 p-4 items-center">
+            {/* El click ahora vive SOLO en el encabezado */}
+            <div
+                onClick={() => { onClick(res.id); setConfirmAction(null); }}
+                className="grid grid-cols-[auto_1fr_auto] gap-4 p-4 items-center cursor-pointer"
+            >
 
                 {/* 1. TIME BOX (Datos Duros) */}
                 <div className={cn(
@@ -256,7 +259,11 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                 <div className="flex-1 h-full">
                                     {res.status === 'pending' && (
                                         <motion.button
-                                            onClick={(e) => { e.stopPropagation(); onUpdate(res.id, { status: 'confirmed' }); }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onUpdate(res.id, { status: 'confirmed' });
+                                                onClick(res.id); // Cerrar tarjeta
+                                            }}
                                             className="w-full h-full rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 hover:border-emerald-300 transition-all duration-300 font-black text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2"
                                             title="Confirmar Reserva"
                                         >
@@ -267,7 +274,11 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
 
                                     {res.status === 'confirmed' && (
                                         <motion.button
-                                            onClick={(e) => { e.stopPropagation(); onUpdate(res.id, { status: 'seated', time: getCurrentTime() }); }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onUpdate(res.id, { status: 'seated', time: getCurrentTime() });
+                                                onClick(res.id); // Cerrar tarjeta
+                                            }}
                                             className="w-full h-full rounded-md bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/20 hover:border-amber-300 transition-all duration-300 font-black text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2"
                                             title="Marcar como Llegó"
                                         >
@@ -278,7 +289,10 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
 
                                     {res.status === 'seated' && (
                                         <motion.button
-                                            onClick={(e) => handleAction(e, 'release', () => onUpdate(res.id, { status: 'finished' }))}
+                                            onClick={(e) => handleAction(e, 'release', () => {
+                                                onUpdate(res.id, { status: 'finished' });
+                                                onClick(res.id); // Cerrar tarjeta
+                                            })}
                                             className={cn(
                                                 "w-full h-full rounded-md border transition-all duration-300 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm",
                                                 confirmAction === 'release'
@@ -349,7 +363,7 @@ const ReservationListView = ({ reservations, selectedId, onSelect, onUpdate, onD
                         <TimeGroupHeader time={group.time} count={group.items.length} />
 
                         {/* LISTA DE TARJETAS EN ESA HORA */}
-                        <div className="space-y-1">
+                        <div className="space-y-3">
                             {group.items.map(res => (
                                 <ReservationCard
                                     key={res.id}
