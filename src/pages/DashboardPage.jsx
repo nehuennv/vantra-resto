@@ -14,6 +14,7 @@ import { cn } from "../lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area"; // <--- EL COMPONENTE ESTRELLA
 import { useTheme } from "../context/ThemeContext";
 import { useReservations } from "../context/ReservationsContext";
+import { useAuth } from "../context/AuthContext";
 import { clientConfig } from "../config/client";
 import { historicalAverages } from "../data/mockData";
 import { analyzeOperations } from "../lib/intelligence";
@@ -53,6 +54,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 const DashboardPage = () => {
     const { theme, themeMode } = useTheme();
     const { reservations } = useReservations();
+    const { user } = useAuth();
     const themeColor = theme.color;
 
     // 🎨 COLORES ADAPTATIVOS PARA GRÁFICOS
@@ -153,7 +155,7 @@ const DashboardPage = () => {
 
             {/* 2. COMPONENTE SCROLLAREA: Este maneja el scroll ahora */}
             <ScrollArea className="h-full w-full">
-                
+
                 {/* 3. WRAPPER INTERNO: Aquí damos el padding y el espacio entre elementos */}
                 <div className="flex flex-col space-y-5 p-2 lg:p-4 pb-20">
 
@@ -210,6 +212,7 @@ const DashboardPage = () => {
 
                     {/* --- KPIs PRINCIPALES --- */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
+
                         <BentoCard title="Mesas Activas" icon={CalendarCheck} delay={0.1}>
                             <div className="flex items-baseline gap-2 mt-auto">
                                 <span className="text-4xl font-bold text-foreground tabular-nums">{totalReservations}</span>
@@ -318,7 +321,7 @@ const DashboardPage = () => {
                         </BentoCard>
 
                         {/* VANTRA INTELLIGENCE */}
-                        <BentoCard title="Vantra Intelligence" icon={Sparkles} delay={0.4} className="lg:col-span-1 min-h-[180px]">
+                        <BentoCard title='ASISTENTE IA' icon={Sparkles} delay={0.4} className="lg:col-span-1 min-h-[180px]">
                             <div className="flex flex-col h-full justify-between mt-2">
                                 <div className="flex gap-4 items-start">
                                     <div className={cn(

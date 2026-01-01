@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     CalendarClock,
@@ -18,6 +18,8 @@ import BrandLogo from "../components/ui/BrandLogo";
 import { useTheme } from "../context/ThemeContext";
 import ReservationFormModal from "../components/reservations/ReservationFormModal";
 import { useReservations } from "../context/ReservationsContext";
+import { clientConfig } from "../config/client";
+import { useAuth } from "../context/AuthContext";
 
 // --- CONFIGURACIÓN DE ANIMACIONES ---
 // Extraemos esto para mantener el código limpio y consistente.
@@ -114,7 +116,7 @@ const SidebarItem = ({ to, icon: Icon, label, isCollapsed }) => {
 };
 
 // Componente de Perfil de Admin Refactorizado
-const AdminProfile = ({ isCollapsed, onClick }) => {
+const AdminProfile = ({ isCollapsed, onClick, onLogout }) => {
     return (
         <div
             onClick={onClick}
@@ -146,7 +148,7 @@ const AdminProfile = ({ isCollapsed, onClick }) => {
                     className="flex flex-col overflow-hidden whitespace-nowrap"
                 >
                     <span className="text-sm font-bold text-foreground leading-none mb-1">
-                        Admin Vantra
+                        Admin {clientConfig.shortName}
                     </span>
                     <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
                         Gerente General
@@ -154,6 +156,10 @@ const AdminProfile = ({ isCollapsed, onClick }) => {
                 </motion.div>
 
                 <motion.button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onLogout && onLogout();
+                    }}
                     animate={{
                         width: isCollapsed ? 0 : "auto",
                         opacity: isCollapsed ? 0 : 1,
@@ -183,8 +189,15 @@ const DashboardLayout = () => {
     const [modalInitialData, setModalInitialData] = useState(null);
 
     const location = useLocation();
-    const { clientConfig } = useTheme();
+    const { } = useTheme(); // clientConfig imported globally
     const { selectedDate, addReservation, updateReservation } = useReservations();
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
     // --- MANEJO DE MODALES ---
     const handleOpenModal = (data = null) => {
@@ -241,8 +254,8 @@ const DashboardLayout = () => {
                         </h3>
                     </motion.div>
 
-                    <SidebarItem to="/reservations" icon={CalendarClock} label="Reservas" isCollapsed={isCollapsed} />
-                    <SidebarItem to="/" icon={LayoutDashboard} label="Estadísticas" isCollapsed={isCollapsed} />
+                    <SidebarItem to="/dashboard/reservations" icon={CalendarClock} label="Reservas" isCollapsed={isCollapsed} />
+                    <SidebarItem to="/dashboard" icon={LayoutDashboard} label="Estadísticas" isCollapsed={isCollapsed} />
 
                     <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent w-full" />
 
@@ -278,7 +291,7 @@ const DashboardLayout = () => {
                 </div>
 
                 {/* 3. Footer Admin (Reemplaza la versión anterior) */}
-                <AdminProfile isCollapsed={isCollapsed} onClick={() => setShowSettings(true)} />
+                <AdminProfile isCollapsed={isCollapsed} onClick={() => setShowSettings(true)} onLogout={handleLogout} />
 
                 {/* 4. Botón de Colapso (Flotante) */}
                 <motion.button
@@ -371,9 +384,9 @@ const DashboardLayout = () => {
 
 // Helper para títulos
 const pathnameToTitle = (path) => {
-    if (path === "/") return "Visión General";
-    if (path === "/reservations") return "Gestión de Reservas";
-    return "Sistema Vantra";
+    if (path === "/dashboard") return "Visión General";
+    if (path === "/dashboard/reservations") return "Gestión de Reservas";
+    return `Sistema ${clientConfig.name}`;
 };
 
 export default DashboardLayout;

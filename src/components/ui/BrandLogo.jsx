@@ -1,7 +1,8 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Hexagon } from "lucide-react"; // O el icono que uses
+import { UtensilsCrossed } from "lucide-react"; // O el icono que uses
 import { cn } from "../../lib/utils";
+import { clientConfig } from "../../config/client";
 
 const BrandLogo = ({ collapsed = false }) => {
     return (
@@ -12,7 +13,7 @@ const BrandLogo = ({ collapsed = false }) => {
             {/* ICONO - Siempre visible, pero ajusta tamaño sutilmente */}
             <div className="relative z-10 flex items-center justify-center shrink-0">
                 <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 text-primary-foreground">
-                    <Hexagon size={24} strokeWidth={2.5} className="fill-white/20" />
+                    <UtensilsCrossed size={20} strokeWidth={2.5} className="text-white" />
                 </div>
             </div>
 
@@ -27,11 +28,11 @@ const BrandLogo = ({ collapsed = false }) => {
                         className="flex flex-col justify-center overflow-hidden whitespace-nowrap"
                     >
                         <span className="font-bold text-lg tracking-tight leading-none text-foreground">
-                            Vantra
+                            {clientConfig.name}
                             <span className="text-primary">.</span>
                         </span>
                         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest leading-none mt-0.5">
-                            Resto Manager
+                            Gestión
                         </span>
                     </motion.div>
                 )}

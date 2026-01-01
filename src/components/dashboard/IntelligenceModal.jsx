@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Activity, Zap, Users, CheckCircle, Smartphone, AlertTriangle, Lightbulb, Sparkles } from "lucide-react";
-import { cn } from "../../lib/utils";
+import { clientConfig } from "../../config/client";
 
 const IntelligenceModal = ({ isOpen, onClose, data }) => {
 
@@ -86,7 +86,7 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
 
                                     <div>
                                         <div className="flex items-center gap-2 ">
-                                            <h2 className="text-lg font-bold text-foreground tracking-tight">Vantra Intelligence</h2>
+                                            <h2 className="text-lg font-bold text-foreground tracking-tight">{clientConfig.name} Intelligence</h2>
                                             <div className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border bg-background",
                                                 data.color === 'rose' ? "border-rose-500/40 text-rose-500" :
                                                     data.color === 'amber' ? "border-amber-500/40 text-amber-500" :
@@ -196,7 +196,7 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
                                 </span>
                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                    Vantra Intelligence Live
+                                    {clientConfig.name} Intelligence Live
                                 </p>
                             </div>
                             <p className="text-[11px] font-bold text-muted-foreground tabular-nums bg-background px-2 py-1 rounded border border-border">
