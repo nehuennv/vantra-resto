@@ -7,7 +7,7 @@ const AuthContext = createContext(null);
 const MOCK_USERS = [
     {
         id: 1,
-        email: 'admin@vantra.com',
+        email: 'admin@cabrera.com',
         password: '123',
         name: 'Nehuén (Dueño)',
         role: 'admin',
@@ -24,44 +24,74 @@ const MOCK_USERS = [
 ];
 
 export const AuthProvider = ({ children }) => {
-    // Estado para guardar el usuario actual. 
-    // Intentamos leer de localStorage al iniciar para "recordar" la sesión.
-    const [user, setUser] = useState(() => {
-        const savedUser = localStorage.getItem('vantra_user');
-        return savedUser ? JSON.parse(savedUser) : null;
-    });
-
-    const [loading, setLoading] = useState(false);
+    // Estado para guardar el usuario actual.
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true); // Arranca cargando (Splash)
+    const [loadingMessage, setLoadingMessage] = useState("Sincronizando Entorno..."); // Mensaje dinámico
     const [error, setError] = useState(null);
 
+    // Efecto de Carga Inicial (Simula "Sincronizando Entorno")
+    useEffect(() => {
+        const checkSession = async () => {
+            setLoadingMessage("Sincronizando Entorno...");
+            const savedUser = localStorage.getItem('vantra_user');
+
+            // Tiempo mínimo de Splash Screen al abrir la app
+            // Si hay usuario: 2s (simula fetch de datos)
+            // Si no hay usuario: 1.5s (presentación de marca)
+            const waitTime = savedUser ? 2000 : 1500;
+
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+
+            if (savedUser) {
+                setUser(JSON.parse(savedUser));
+            }
+
+            setLoading(false);
+        };
+
+        checkSession();
+    }, []);
+
     // Función de Login
-    const login = (email, password) => {
-        setLoading(true);
+    const login = async (email, password) => {
+        setLoadingMessage("Iniciando Sesión...");
+        setLoading(true); // Esto activará el Splash Screen nuevamente
         setError(null);
 
-        // Simulamos un delay de red para que se sienta real (UX)
-        setTimeout(() => {
-            const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
+        // Simulamos delay de backend + carga de recursos (Min 2s)
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-            if (foundUser) {
-                // ¡Éxito! Guardamos en estado y en memoria del navegador
-                setUser(foundUser);
-                localStorage.setItem('vantra_user', JSON.stringify(foundUser));
-            } else {
-                setError('Credenciales inválidas. Probá con admin@vantra.com / 123');
-            }
-            setLoading(false);
-        }, 1000);
+        const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
+
+        if (foundUser) {
+            setUser(foundUser);
+            localStorage.setItem('vantra_user', JSON.stringify(foundUser));
+        } else {
+            setError('Credenciales inválidas. Probá con admin@vantra.com / 123');
+            setLoading(false); // Solo bajamos el loading si falló, para mostrar el error en Login
+            // Si tuvo éxito, dejaremos que el sistema redirija (aunque el estado cambiará a !loading eventualmente por el re-render, 
+            // pero es mejor explicitamente bajarlo para que el Router haga su trabajo)
+        }
+
+        if (foundUser) setLoading(false);
     };
 
     // Función de Logout
-    const logout = () => {
+    const logout = async () => {
+        setLoadingMessage("Cerrando Sesión...");
+        setLoading(true);
+
+        // Pequeño delay dramático para que se lea el mensaje y cierre "bien"
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
         setUser(null);
         localStorage.removeItem('vantra_user');
+        setLoading(false);
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading, error, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, loadingMessage, error, isAuthenticated: !!user }}>
             {children}
         </AuthContext.Provider>
     );

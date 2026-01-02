@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Moon, Monitor, Type, Save, BellRing, Check } from "lucide-react";
+import { X, Moon, Monitor, Type, Save, BellRing, Check, LogOut, AlertTriangle } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTheme } from "../context/ThemeContext";
 
@@ -59,7 +59,7 @@ const SettingToggle = ({ icon: Icon, title, description, active, onToggle }) => 
     </div>
 );
 
-const SettingsPanel = ({ isOpen, onClose }) => {
+const SettingsPanel = ({ isOpen, onClose, onLogout }) => {
     const {
         soundEnabled,
         toggleSound,
@@ -70,6 +70,8 @@ const SettingsPanel = ({ isOpen, onClose }) => {
         themeMode,
         toggleTheme
     } = useTheme();
+
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const adjustFont = (delta) => {
         setFontSize(prev => {
@@ -108,7 +110,7 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                                     Preferencias
                                 </h2>
                                 <p className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-wider">
-                                    Configuración del Sistema
+                                    Configuración de Usuario
                                 </p>
                             </div>
                             <button
@@ -194,14 +196,6 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    {/* <SettingToggle
-                                        icon={Monitor}
-                                        title="Alto Contraste"
-                                        description="Resalta bordes y separadores."
-                                        active={highContrast}
-                                        onToggle={() => setHighContrast(!highContrast)}
-                                    /> */}
-
                                     <SettingToggle
                                         icon={BellRing}
                                         title="Alertas Sonoras"
@@ -221,15 +215,52 @@ const SettingsPanel = ({ isOpen, onClose }) => {
                             </section>
                         </div>
 
-                        {/* Footer con Botón Principal */}
-                        <div className="p-6 border-t border-border bg-card">
-                            <button
-                                onClick={onClose}
-                                className="w-full py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-transform active:scale-[0.98] outline-none focus:ring-2 ring-ring ring-offset-2 ring-offset-background"
-                            >
-                                <Save size={18} strokeWidth={2.5} />
-                                <span className="tracking-wide text-sm">Cerrar</span>
-                            </button>
+                        {/* Footer: Cierre de Sesión */}
+                        <div className="p-6 border-t border-border bg-muted/20">
+                            <AnimatePresence mode="wait">
+                                {!isLoggingOut ? (
+                                    <motion.button
+                                        key="logout-btn"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        onClick={() => setIsLoggingOut(true)}
+                                        className="w-full py-4 bg-background border border-border hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-600 text-muted-foreground font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group"
+                                    >
+                                        <LogOut size={18} strokeWidth={2} className="group-hover:translate-x-1 transition-transform" />
+                                        <span className="tracking-wide text-sm">Cerrar Sesión</span>
+                                    </motion.button>
+                                ) : (
+                                    <motion.div
+                                        key="confirm-box"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="space-y-3"
+                                    >
+                                        <div className="flex items-center gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20 mb-2">
+                                            <AlertTriangle className="text-red-500 shrink-0" size={20} />
+                                            <p className="text-xs font-semibold text-red-600 dark:text-red-400">
+                                                ¿Estás seguro que deseas salir del sistema?
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setIsLoggingOut(false)}
+                                                className="flex-1 py-3 bg-background border border-border hover:bg-muted text-foreground font-bold rounded-xl text-xs uppercase tracking-wider transition-colors"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                onClick={onLogout}
+                                                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-red-500/20 transition-all active:scale-95"
+                                            >
+                                                Sí, Salir
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </motion.div>
                 </>

@@ -18,6 +18,62 @@ import ReservationsPage from "./pages/ReservationsPage";
 
 // 👇 UTILS
 import { clientConfig } from "./config/client";
+import { useAuth } from "./context/AuthContext";
+import SplashScreen from "./components/ui/SplashScreen";
+import { AnimatePresence } from "framer-motion";
+
+// 🎬 COMPONENTE DE CONTENIDO: Maneja la lógica de visualización basada en Auth
+const AppContent = () => {
+  const { loading, loadingMessage } = useAuth();
+
+  return (
+    <>
+      {/* 
+        AnimatePresence permite animar la SALIDA (exit) del componente Splash Screen.
+        mode="wait": Espera a que termine la salida antes de mostrar lo siguiente (opcional, 
+                     pero aquí queremos superposición o transición suave).
+        En este caso, como el loading pasa a false, el componente se desmonta.
+        Con AnimatePresence, Framer Motion ejecutará la animación 'exit' antes de quitarlo del DOM.
+      */}
+      <AnimatePresence mode="wait">
+        {loading && <SplashScreen key="splash" message={loadingMessage} />}
+      </AnimatePresence>
+
+      {/* 
+        El resto de la app siempre está "montada" por debajo o lista para mostrarse. 
+        Al irse el Splash, esto queda visible.
+      */}
+      {!loading && (
+        <Routes>
+
+          {/* 🟢 RUTA PÚBLICA: Login */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* 🔴 RUTAS PRIVADAS: Dashboard */}
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <DashboardLayout />
+              </RequireAuth>
+            }
+          >
+            {/* Index: Lo que se ve al entrar a /dashboard */}
+            <Route index element={<DashboardPage />} />
+
+            {/* Reservas: /dashboard/reservations */}
+            <Route path="reservations" element={<ReservationsPage />} />
+          </Route>
+
+          {/* 🔄 REDIRECCIONES */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+        </Routes>
+      )}
+    </>
+  );
+};
 
 function App() {
 
@@ -44,56 +100,16 @@ function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
 
-      {/* 🛡️ NIVEL 1: AUTH PROVIDER 
-          Todo lo que esté aquí adentro sabrá si el usuario está logueado o no. */}
+      {/* 🛡️ NIVEL 1: AUTH PROVIDER */}
       <AuthProvider>
 
-        {/* 🎨 NIVEL 2: THEME PROVIDER 
-            Para manejar modo oscuro/claro en toda la app. */}
+        {/* 🎨 NIVEL 2: THEME PROVIDER */}
         <ThemeProvider>
 
-          {/* 📅 NIVEL 3: DATA PROVIDERS
-              Inyectamos los datos de reservas para que estén listos. */}
+          {/* 📅 NIVEL 3: DATA PROVIDERS */}
           <ReservationsProvider>
 
-            <Routes>
-
-              {/* 🟢 RUTA PÚBLICA: Login 
-                  No tiene "RequireAuth", así que cualquiera puede entrar. */}
-              <Route path="/login" element={<LoginPage />} />
-
-              {/* 🔴 RUTAS PRIVADAS: Dashboard
-                  Aquí cambiamos la estructura un poco:
-                  1. Usamos "/dashboard" como base para separar la app del login.
-                  2. Envolvemos el Layout con <RequireAuth>. Si no hay usuario, te patea al login. */}
-              <Route
-                path="/dashboard"
-                element={
-                  <RequireAuth>
-                    <DashboardLayout />
-                  </RequireAuth>
-                }
-              >
-                {/* Index: Lo que se ve al entrar a /dashboard */}
-                <Route index element={<DashboardPage />} />
-
-                {/* Reservas: /dashboard/reservations */}
-                <Route path="reservations" element={<ReservationsPage />} />
-              </Route>
-
-              {/* 🔄 REDIRECCIONES
-                  Si el usuario entra a la raíz "/" (ej: vantra.com),
-                  lo mandamos directo a /dashboard.
-                  
-                  Si NO está logueado, el RequireAuth de /dashboard lo mandará a /login.
-                  Si SÍ está logueado, verá el dashboard. 
-                  ¡Magia! ✨ */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-              {/* Catch-all para rutas rotas (404) */}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-
-            </Routes>
+            <AppContent />
 
           </ReservationsProvider>
         </ThemeProvider>

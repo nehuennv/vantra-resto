@@ -155,23 +155,6 @@ const AdminProfile = ({ isCollapsed, onClick, onLogout }) => {
                     </span>
                 </motion.div>
 
-                <motion.button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onLogout && onLogout();
-                    }}
-                    animate={{
-                        width: isCollapsed ? 0 : "auto",
-                        opacity: isCollapsed ? 0 : 1,
-                        scale: isCollapsed ? 0 : 1
-                    }}
-                    className={cn(
-                        "text-muted-foreground hover:text-red-500 transition-colors",
-                        isCollapsed ? "w-0 p-0 overflow-hidden" : "ml-auto p-2"
-                    )}
-                >
-                    <LogOut size={16} />
-                </motion.button>
             </div>
         </div>
     );
@@ -294,11 +277,10 @@ const DashboardLayout = () => {
                 <AdminProfile isCollapsed={isCollapsed} onClick={() => setShowSettings(true)} onLogout={handleLogout} />
 
                 {/* 4. Botón de Colapso (Flotante) */}
-                <motion.button
+                {/* 4. Botón de Colapso (Flotante) */}
+                <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="absolute -right-3 top-[74px] -translate-y-1/2 z-50 flex items-center justify-center w-6 h-6 bg-background border border-border shadow-md rounded-full text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                    className="absolute -right-3 top-20 -translate-y-1/2 z-50 flex items-center justify-center w-6 h-6 bg-background border border-border shadow-md rounded-full text-muted-foreground hover:text-primary transition-colors focus:outline-none"
                 >
                     <motion.div
                         animate={{ rotate: isCollapsed ? 180 : 0 }}
@@ -306,7 +288,7 @@ const DashboardLayout = () => {
                     >
                         <ChevronLeft size={14} />
                     </motion.div>
-                </motion.button>
+                </button>
 
             </motion.aside>
 
@@ -376,7 +358,7 @@ const DashboardLayout = () => {
             </main>
 
             {/* Modales */}
-            <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+            <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} onLogout={handleLogout} />
             <ReservationFormModal isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleModalSubmit} initialData={modalInitialData} />
         </div>
     );
