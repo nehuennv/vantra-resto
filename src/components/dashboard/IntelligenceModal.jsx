@@ -87,7 +87,7 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
 
                                     <div>
                                         <div className="flex items-center gap-3 mb-1">
-                                            <h2 className="text-xl font-bold text-foreground tracking-tight">{clientConfig.name} Intelligence</h2>
+                                            <h2 className="text-xl font-bold text-foreground tracking-tight">Asistente de IA</h2>
                                             <div className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border backdrop-blur-sm",
                                                 data.color === 'rose' ? "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400" :
                                                     data.color === 'amber' ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400" :

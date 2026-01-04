@@ -121,7 +121,7 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                 style.borderLeft,
                 isSelected
                     ? "ring-1 ring-inset ring-primary/20 shadow-md border-y-primary/20 border-r-primary/20"
-                    : "border-y-border border-r-border hover:border-r-primary/30 hover:shadow-md"
+                    : "border-y-border border-r-border hover:brightness-125 hover:shadow-md"
             )}
         >
             {/* --- GRID ESTRUCTURAL (Layout Fijo) --- */}

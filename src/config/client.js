@@ -4,7 +4,7 @@ export const clientConfig = {
     // --- IDENTIDAD ---
     name: "La Cabrera",
     shortName: "Cabrera",
-    themeColor: '#8E0B27',
+    themeColor: '#ffc400',
     //#E8EF41
     //#EF4178
     //#0AD3A4
