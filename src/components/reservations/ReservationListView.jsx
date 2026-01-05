@@ -167,7 +167,7 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                         <span className="text-border">|</span>
                         <div className="flex items-center gap-1.5 capitalize text-xs">
                             {res.origin === 'whatsapp' ? <MessageCircle size={12} /> : res.origin === 'walk-in' ? <Store size={12} /> : <Phone size={12} />}
-                            {res.origin}
+                            {res.origin === 'walk-in' ? 'Presencial' : res.origin}
                         </div>
                     </div>
                 </div>

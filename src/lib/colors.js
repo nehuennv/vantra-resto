@@ -39,9 +39,29 @@ export const hexToTailwindHsl = (hex) => {
     return `${h.toFixed(1)} ${s.toFixed(1)}% ${l.toFixed(1)}%`;
 };
 
-// Mantenemos la de contraste
+// Helper para Luminancia Relativa (WCAG)
+const getLuminance = (r, g, b) => {
+    const a = [r, g, b].map(v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+};
+
+// Contraste robusto usando Ratios WCAG
 export const getContrastColor = (hex) => {
     const rgb = hexToRgb(hex);
-    const yiq = ((rgb.r * 299) + (rgb.g * 587) + (rgb.b * 114)) / 1000;
-    return (yiq >= 128) ? '222 47% 11%' : '210 40% 98%';
+    if (!rgb) return '210 40% 98%'; // Fallback a claro si falla
+
+    const L = getLuminance(rgb.r, rgb.g, rgb.b);
+
+    // Calcular ratio con Blanco (L=1) y Negro (L=0)
+    // Formula: (L1 + 0.05) / (L2 + 0.05)
+
+    const whiteRatio = (1.05) / (L + 0.05);
+    const blackRatio = (L + 0.05) / 0.05;
+
+    // Si el negro tiene mejor contraste, devolver oscuro. Si no, claro.
+    // Usamos los mismos valores HSL de retorno que antes para mantener consistencia de diseño
+    return (blackRatio > whiteRatio) ? '222 47% 11%' : '210 40% 98%';
 };

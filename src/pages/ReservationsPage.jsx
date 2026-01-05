@@ -1,4 +1,4 @@
-import React, { useState, useMemo, memo } from 'react';
+import React, { useState, useMemo, memo, useEffect } from 'react';
 import { AnimatePresence, motion } from "framer-motion";
 import {
     Search, ChevronLeft, ChevronRight, History, CalendarDays,
@@ -9,6 +9,7 @@ import { useOutletContext } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useReservations } from "../context/ReservationsContext";
 import { cn } from "../lib/utils";
+import AnimatedSwitch from "@/components/ui/AnimatedSwitch";
 
 import ReservationListView from '../components/reservations/ReservationListView';
 import ReservationKanbanView from '../components/reservations/ReservationKanbanView';
@@ -31,6 +32,8 @@ const formatDateHeader = (dateString) => {
 
 // --- COMPONENTES UI (LOCALS) ---
 
+// --- COMPONENTES UI (LOCALS) ---
+
 const SectionSeparator = memo(({ label }) => (
     <div className="flex items-center gap-3 w-full py-2 opacity-60">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
@@ -39,41 +42,6 @@ const SectionSeparator = memo(({ label }) => (
         <div className="h-px bg-border flex-1" />
     </div>
 ));
-
-const ViewSwitcher = memo(({ currentView, setView }) => {
-    const views = [
-        { id: 'list', label: 'Lista', icon: LayoutList },
-        { id: 'kanban', label: 'Tablero', icon: Kanban },
-    ];
-
-    return (
-        <div className="flex items-center bg-muted/30 p-1 rounded-lg border border-border/40 h-10 w-full sm:w-auto">
-            {views.map((v) => {
-                const isActive = currentView === v.id;
-                return (
-                    <button
-                        key={v.id}
-                        onClick={() => setView(v.id)}
-                        className={cn(
-                            "relative flex items-center justify-center gap-2 px-4 h-full rounded-md text-xs font-bold transition-all z-10 flex-1 sm:flex-initial",
-                            isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                        )}
-                    >
-                        {isActive && (
-                            <motion.div
-                                layoutId="activeViewTab"
-                                className="absolute inset-0 bg-background shadow-sm border border-border/50 rounded-md z-[-1]"
-                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                            />
-                        )}
-                        <v.icon size={14} className={isActive ? "text-primary" : ""} />
-                        <span>{v.label}</span>
-                    </button>
-                );
-            })}
-        </div>
-    );
-});
 
 const StatusFilterItem = memo(({ filter, isSelected, count, onClick }) => (
     <button
@@ -138,7 +106,18 @@ const ReservationsPage = () => {
     const [selectedId, setSelectedId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
-    const [currentView, setCurrentView] = useState('list');
+    // Estado de vista persistente
+    const [currentView, setCurrentView] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('reservations-view-preference') || 'list';
+        }
+        return 'list';
+    });
+
+    // Guardar preferencia de vista
+    useEffect(() => {
+        localStorage.setItem('reservations-view-preference', currentView);
+    }, [currentView]);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     // --- LÓGICA DE DATOS ---
@@ -258,7 +237,15 @@ const ReservationsPage = () => {
 
                         <div className="w-px h-8 bg-border/60 hidden lg:block" />
 
-                        <ViewSwitcher currentView={currentView} setView={setCurrentView} />
+                        <AnimatedSwitch
+                            value={currentView}
+                            onChange={setCurrentView}
+                            options={[
+                                { value: 'list', label: 'Lista', icon: LayoutList },
+                                { value: 'kanban', label: 'Tablero', icon: Kanban },
+                            ]}
+                            className="h-10 w-full sm:w-auto"
+                        />
                     </div>
                 </div>
             </header>
@@ -368,27 +355,54 @@ const ReservationsPage = () => {
     );
 };
 
-// Componente Empty State Reutilizable
+// Componente Empty State Reutilizable (Professional & Polished)
 const EmptyState = ({ onClear }) => (
     <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0 }}
-        className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-8"
+        initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+        exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="flex flex-col items-center justify-center h-full min-h-[500px] text-center p-8 select-none"
     >
-        <div className="w-24 h-24 bg-muted/30 rounded-full flex items-center justify-center mb-4">
-            <Layers size={40} className="text-muted-foreground/50" />
+        {/* Decorative Background Blob & Icon */}
+        <div className="relative mb-6 group cursor-default">
+            {/* Pulsing Aura - Subtle and slow */}
+            <motion.div
+                animate={{ scale: [1, 1.05, 1], opacity: [0.2, 0.4, 0.2] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 bg-primary/10 blur-3xl rounded-full"
+            />
+
+            {/* Glass Container */}
+            <div className="relative w-28 h-28 bg-card/50 backdrop-blur-xl border border-border/50 rounded-[2rem] flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-500 ease-out group-hover:border-primary/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-[2rem] opacity-50 pointer-events-none" />
+                <Layers size={40} className="text-muted-foreground/40 group-hover:text-primary transition-colors duration-500" strokeWidth={1.5} />
+            </div>
         </div>
-        <h3 className="text-lg font-bold text-foreground">Sin Reservas</h3>
-        <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-6">
-            No hay reservas que coincidan con los filtros actuales.
-        </p>
-        <button
+
+        {/* Text Content - Professional & Clear */}
+        <div className="max-w-sm space-y-2 mb-8">
+            <h3 className="text-xl font-bold text-foreground tracking-tight">
+                Sin reservas encontradas
+            </h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+                No hay coincidencias para los filtros o criterios de búsqueda actuales.
+            </p>
+        </div>
+
+        {/* Action Button */}
+        <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={onClear}
-            className="text-primary text-sm font-bold hover:underline"
+            className="group relative px-6 py-2.5 bg-primary/10 hover:bg-primary/15 text-primary border border-primary/20 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md flex items-center gap-2 overflow-hidden"
         >
-            Limpiar Filtros
-        </button>
+            <span className="relative z-10">Limpiar filtros</span>
+            <FilterX size={14} className="relative z-10 group-hover:rotate-180 transition-transform duration-500" />
+
+            {/* Hover Shine Effect */}
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+        </motion.button>
     </motion.div>
 );
 

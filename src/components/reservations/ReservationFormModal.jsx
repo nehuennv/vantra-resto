@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Clock, User, Users, Phone, FileText, Globe } from "lucide-react";
+import { X, Calendar, Clock, User, Users, Phone, FileText, Globe, Store } from "lucide-react";
 import { cn } from "../../lib/utils";
 
-const initialFormState = { name: '', pax: 2, time: '', date: '', origin: 'walk-in', notes: '', phone: '' };
+const initialFormState = { name: '', pax: 2, time: '', date: '', origin: 'whatsapp', notes: '', phone: '' };
 
 // Variantes para Framer Motion
 const overlayVariants = {
@@ -87,6 +87,54 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                         {/* Formulario */}
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
 
+                            {/* SWITCH PRESENCIAL (Solo nueva reserva) */}
+                            {!initialData && (
+                                <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className={cn("p-2 rounded-lg transition-colors", formData.origin === 'walk-in' ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                                            <Store size={18} />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-foreground">¿Cliente Presencial?</span>
+                                            <span className="text-[10px] text-muted-foreground">Llegó al local ahora mismo</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const isNowWalkIn = formData.origin !== 'walk-in'; // Toggle
+                                            if (isNowWalkIn) {
+                                                const now = new Date();
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    origin: 'walk-in',
+                                                    date: now.toISOString().split('T')[0],
+                                                    time: now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                                                    status: 'seated' // Entra directo a mesa
+                                                }));
+                                            } else {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    origin: 'whatsapp', // Default fallback
+                                                    status: 'pending'
+                                                }));
+                                            }
+                                        }}
+                                        className={cn(
+                                            "relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary/20 shrink-0",
+                                            formData.origin === 'walk-in' ? "bg-primary" : "bg-muted-foreground/30"
+                                        )}
+                                    >
+                                        <span
+                                            className={cn(
+                                                "block w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ease-in-out absolute top-0.5 left-0.5",
+                                                formData.origin === 'walk-in' ? "translate-x-5" : "translate-x-0"
+                                            )}
+                                        />
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Fila 1: Fecha y Hora */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
@@ -96,7 +144,11 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                                     <input
                                         type="date"
                                         required
-                                        className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground"
+                                        disabled={formData.origin === 'walk-in' && !initialData}
+                                        className={cn(
+                                            "w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground",
+                                            formData.origin === 'walk-in' && !initialData && "opacity-60 cursor-not-allowed bg-muted/50"
+                                        )}
                                         value={formData.date}
                                         onChange={e => setFormData({ ...formData, date: e.target.value })}
                                     />
@@ -108,7 +160,11 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                                     <input
                                         type="time"
                                         required
-                                        className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors"
+                                        disabled={formData.origin === 'walk-in' && !initialData}
+                                        className={cn(
+                                            "w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors",
+                                            formData.origin === 'walk-in' && !initialData && "opacity-60 cursor-not-allowed bg-muted/50"
+                                        )}
                                         value={formData.time}
                                         onChange={e => setFormData({ ...formData, time: e.target.value })}
                                     />
@@ -152,14 +208,16 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                                     </label>
                                     <div className="relative">
                                         <select
-                                            className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors appearance-none cursor-pointer"
+                                            disabled={formData.origin === 'walk-in' && !initialData}
+                                            className={cn(
+                                                "w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors appearance-none cursor-pointer",
+                                                formData.origin === 'walk-in' && !initialData && "opacity-60 cursor-not-allowed bg-muted/50"
+                                            )}
                                             value={formData.origin}
                                             onChange={e => setFormData({ ...formData, origin: e.target.value })}
                                         >
-                                            <option value="walk-in">Walk-in (Presencial)</option>
-                                            <option value="phone">Teléfono</option>
                                             <option value="whatsapp">WhatsApp / Bot</option>
-                                            <option value="web">Sitio Web</option>
+                                            <option value="walk-in">Presencial</option>
                                         </select>
                                         {/* Flecha custom para el select */}
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
@@ -204,7 +262,7 @@ const ReservationFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                                 type="submit"
                                 className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 mt-2 active:scale-95 transition-all outline-none focus:outline-none focus:ring-0"
                             >
-                                {initialData ? "Guardar Cambios" : "Crear Reserva"}
+                                {initialData ? "Guardar Cambios" : (formData.origin === 'walk-in' ? "Ingresar Cliente" : "Crear Reserva")}
                             </button>
                         </form>
                     </motion.div>

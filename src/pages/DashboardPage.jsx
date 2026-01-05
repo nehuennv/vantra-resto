@@ -20,6 +20,7 @@ import { historicalAverages } from "../data/mockData";
 import { analyzeOperations } from "../lib/intelligence";
 import BentoCard from "../components/dashboard/BentoCard";
 import IntelligenceModal from "../components/dashboard/IntelligenceModal";
+import AnimatedSwitch from "@/components/ui/AnimatedSwitch";
 
 // --- TOOLTIP PREMIUM (Bi-Modo Adaptativo) ---
 const CustomTooltip = ({ active, payload, label }) => {
@@ -163,36 +164,15 @@ const DashboardPage = () => {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
                         <div className="flex items-center gap-4">
                             {isSplitMode && (
-                                <div className="grid grid-cols-2 bg-muted/50 p-1 rounded-xl border border-border/60 relative h-11 shadow-sm items-center w-[260px] backdrop-blur-sm">
-                                    {[
-                                        { id: 'lunch', label: 'Mediodía', icon: Sun },
-                                        { id: 'dinner', label: 'Noche', icon: Moon }
-                                    ].map((shift) => {
-                                        const isActive = currentShift === shift.id;
-                                        return (
-                                            <button
-                                                key={shift.id}
-                                                onClick={() => setCurrentShift(shift.id)}
-                                                className={cn(
-                                                    "relative flex items-center justify-center gap-2 h-full rounded-lg text-sm font-bold transition-all duration-200 outline-none border-none ring-0 select-none",
-                                                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                                                )}
-                                            >
-                                                {isActive && (
-                                                    <motion.div
-                                                        layoutId="activeTab"
-                                                        className="absolute inset-0 bg-primary/10 rounded-lg shadow-none"
-                                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                                    />
-                                                )}
-                                                <span className="relative z-10 flex items-center gap-2">
-                                                    <shift.icon size={14} className={cn("transition-all", isActive && "text-primary")} />
-                                                    {shift.label}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                                <AnimatedSwitch
+                                    value={currentShift}
+                                    onChange={setCurrentShift}
+                                    options={[
+                                        { value: 'lunch', label: 'Mediodía', icon: Sun },
+                                        { value: 'dinner', label: 'Noche', icon: Moon }
+                                    ]}
+                                    className="w-[260px] h-11 backdrop-blur-sm"
+                                />
                             )}
                         </div>
 

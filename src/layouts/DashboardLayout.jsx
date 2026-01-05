@@ -184,7 +184,7 @@ const DashboardLayout = () => {
 
     // --- MANEJO DE MODALES ---
     const handleOpenModal = (data = null) => {
-        setModalInitialData(data || { name: '', pax: 2, time: '', origin: 'walk-in', notes: '', phone: '', date: selectedDate });
+        setModalInitialData(data);
         setIsModalOpen(true);
     };
 

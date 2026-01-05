@@ -1,15 +1,42 @@
 // src/config/client.js
 
+// --- PALETA DE COLORES (Descomenta la que quieras usar) ---
+const COLOR_VARIANTS = {
+    // --- CLÁSICOS / ELEGANTES ---
+    SignatureGold: '#ffc400',   // Lujo, Tradición, Carnes Premium             
+    RoyalPurple: '#7c3aed',     // Sofisticado, Lounge, Vinos
+    MidnightBlue: '#0f172a',    // Serio, Corporativo, Minimalista (Cuidado con dark mode)
+    RubyRed: '#e11d48',         // Pasión, Italiano, Carnes Rojas
+
+    // --- MODERNOS / VIBRANTES ---
+    ElectricLime: '#E8EF41',    // Disruptivo, Fast-Casual, Joven
+    HotPink: '#EF4178',         // Sushi Bar, Cocktails, Fiesta
+    CyanFuture: '#06b6d4',      // Tecnológico, Mariscos, Frío
+    SunsetOrange: '#f97316',    // Burgers, Rápido, Apetitoso
+
+    // --- FRESCOS / NATURALES ---
+    MintTeal: '#0AD3A4',        // Vegano, Saludable, Brunch
+    SageGreen: '#84cc16',       // Ensaladas, Eco-Friendly
+    OceanBlue: '#3b82f6',       // Costa, Pescados, Aire Libre
+
+    // --- CÁLIDOS / ACOGEDORES ---
+    Terracotta: '#c2410c',      // Horno de Barro, rústico, Pizza
+    Saffron: '#fbbf24',         // Especias, Indio, Arabe
+    Espresso: '#78350f',        // Cafetería, Pastelería, Chocolate
+
+    // --- TENDENCIA (NEON / CYBER) ---
+    NeonViolet: '#d946ef',      // Bar Nocturno, Arcade
+    AcidGreen: '#a3e635',       // Smoothie Bar, Gym Food
+};
+
+// <--- CAMBIA ESTO PARA PROBAR COLORES
+const ACTIVE_COLOR = COLOR_VARIANTS.AcidGreen;
+
 export const clientConfig = {
     // --- IDENTIDAD ---
     name: "La Cabrera",
     shortName: "Cabrera",
-    themeColor: '#ffc400',
-    //#E8EF41
-    //#EF4178
-    //#0AD3A4
-    //#F97316
-    //#F97316
+    themeColor: ACTIVE_COLOR,
     currency: "$",
     locale: "es-AR",
 
