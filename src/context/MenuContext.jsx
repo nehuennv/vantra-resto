@@ -138,6 +138,14 @@ export const MenuProvider = ({ children }) => {
     };
 
     const addCategory = async (name) => {
+        // Validation: Check for duplicates (case-insensitive)
+        const nameLower = name.trim().toLowerCase();
+        const exists = categories.some(cat => cat.name.toLowerCase() === nameLower);
+
+        if (exists) {
+            throw new Error('Ya existe una categoría con ese nombre.');
+        }
+
         const newCategory = await menuService.createCategory(name);
         setCategories(prev => [...prev, newCategory]);
     };

@@ -1,6 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Upload, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Upload, DollarSign, Tag, FileText, List, Utensils } from 'lucide-react';
+import { cn } from "../../lib/utils";
+
+// Variantes para Framer Motion (Idénticas a ReservationFormModal)
+const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, transition: { duration: 0.2, delay: 0.1 } }
+};
+
+const modalVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        transition: { type: "spring", stiffness: 300, damping: 25, duration: 0.3 }
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.95,
+        y: 20,
+        transition: { duration: 0.2 }
+    }
+};
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, initialData, categories }) {
     const [formData, setFormData] = useState({
@@ -14,13 +38,8 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
     });
 
     useEffect(() => {
-        if (isOpen && initialData) {
-            setFormData({
-                ...initialData,
-                ingredients: Array.isArray(initialData.ingredients) ? initialData.ingredients.join(', ') : initialData.ingredients || ''
-            });
-        } else if (isOpen && !initialData) {
-            setFormData({
+        if (isOpen) {
+            const defaultValues = {
                 name: '',
                 description: '',
                 price: '',
@@ -28,19 +47,28 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
                 image: '',
                 ingredients: '',
                 available: true
-            });
+            };
+
+            if (initialData) {
+                setFormData({
+                    ...defaultValues,
+                    ...initialData,
+                    ingredients: Array.isArray(initialData.ingredients)
+                        ? initialData.ingredients.join(', ')
+                        : (initialData.ingredients || '')
+                });
+            } else {
+                setFormData(defaultValues);
+            }
         }
-    }, [isOpen, initialData?.id, categories]);
+    }, [isOpen, initialData?.id]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         // Validation
         const priceValue = parseFloat(formData.price);
-        if (priceValue < 0) {
-            alert("El precio no puede ser negativo.");
-            return;
-        }
+        if (priceValue < 0) return;
 
         const payload = {
             ...formData,
@@ -59,172 +87,189 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
         }));
     };
 
-    if (!isOpen) return null;
-
     return (
         <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-                onClick={onClose}
-            >
+            {isOpen && (
                 <motion.div
-                    initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                    className="bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800"
-                    onClick={e => e.stopPropagation()}
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    variants={overlayVariants}
                 >
-                    {/* Header */}
-                    <div className="px-8 py-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
-                        <h2 className="text-2xl font-light text-zinc-900 dark:text-white">
-                            {initialData ? 'Editar Producto' : 'Crear Nuevo Plato'}
-                        </h2>
-                        <button
-                            onClick={onClose}
-                            className="p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors text-zinc-500"
-                        >
-                            <X size={24} />
-                        </button>
-                    </div>
+                    {/* BACKDROP */}
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
 
-                    <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[80vh]">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                            {/* Left Column */}
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Nombre del Plato</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        required
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all shadow-sm"
-                                        placeholder="Ej. Royal Truffle Burger"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Precio</label>
-                                        <div className="relative">
-                                            <span className="absolute left-4 top-3.5 text-zinc-400">$</span>
-                                            <input
-                                                type="number"
-                                                name="price"
-                                                required
-                                                min="0"
-                                                value={formData.price}
-                                                onChange={handleChange}
-                                                className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl pl-8 pr-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all shadow-sm font-mono"
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Categoría</label>
-                                        <select
-                                            name="categoryId"
-                                            value={formData.categoryId}
-                                            onChange={handleChange}
-                                            className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all shadow-sm appearance-none"
-                                        >
-                                            {categories.map(cat => (
-                                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">URL de Imagen</label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="url"
-                                            name="image"
-                                            value={formData.image}
-                                            onChange={handleChange}
-                                            className="flex-1 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all shadow-sm text-sm"
-                                            placeholder="https://..."
-                                        />
-                                        <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
-                                            {formData.image ? (
-                                                <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <Upload size={16} className="text-zinc-300" />
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right Column */}
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Descripción</label>
-                                    <textarea
-                                        name="description"
-                                        rows="3"
-                                        value={formData.description}
-                                        onChange={handleChange}
-                                        className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all shadow-sm resize-none"
-                                        placeholder="Describe los sabores y la experiencia..."
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Ingredientes <span className="text-zinc-300 font-normal lowercase">(separados por coma)</span></label>
-                                    <textarea
-                                        name="ingredients"
-                                        rows="3"
-                                        value={formData.ingredients}
-                                        onChange={handleChange}
-                                        className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all shadow-sm resize-none"
-                                        placeholder="Ej: Pan Brioche, Carne Wagyu, Queso Brie..."
-                                    />
-                                </div>
-
-                                <div className="flex items-center gap-3 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-800">
-                                    <input
-                                        type="checkbox"
-                                        id="available"
-                                        name="available"
-                                        checked={formData.available}
-                                        onChange={handleChange}
-                                        className="w-5 h-5 rounded border-zinc-300 text-black focus:ring-black dark:focus:ring-white"
-                                    />
-                                    <label htmlFor="available" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 select-none cursor-pointer">
-                                        Disponible en Menu
-                                    </label>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        {/* Footer Actions */}
-                        <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-end gap-3">
+                    {/* MODAL CARD */}
+                    <motion.div
+                        className="bg-card border border-border w-full max-w-2xl rounded-2xl shadow-2xl relative z-10 flex flex-col overflow-hidden max-h-[90vh]"
+                        variants={modalVariants}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-border bg-muted/40 flex justify-between items-center shrink-0">
+                            <h2 className="text-lg font-bold text-foreground tracking-wide flex items-center gap-2">
+                                <Utensils size={18} className="text-primary" />
+                                {initialData ? 'Editar Producto' : 'Nuevo Plato'}
+                            </h2>
                             <button
-                                type="button"
                                 onClick={onClose}
-                                className="px-6 py-2.5 rounded-xl text-zinc-600 dark:text-zinc-400 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors outline-none focus:outline-none focus:ring-0"
                             >
-                                Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                className="px-8 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold shadow-lg shadow-zinc-200 dark:shadow-none hover:translate-y-[-1px] active:translate-y-[0px] transition-all flex items-center gap-2"
-                            >
-                                <Save size={18} />
-                                {initialData ? 'Guardar Cambios' : 'Crear Plato'}
+                                <X size={20} />
                             </button>
                         </div>
-                    </form>
+
+                        {/* Formulario */}
+                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+
+                            {/* Nombre */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
+                                    <Utensils size={10} /> Nombre del Plato
+                                </label>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    name="name"
+                                    required
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    className="w-full bg-input border border-border rounded-xl px-4 py-3 text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground font-medium text-lg"
+                                    placeholder="Ej. Hamburguesa Doble"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Left Column */}
+                                <div className="space-y-5">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
+                                                <DollarSign size={10} /> Precio
+                                            </label>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                                                <input
+                                                    type="number"
+                                                    name="price"
+                                                    required
+                                                    min="0"
+                                                    value={formData.price}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-input border border-border rounded-xl pl-7 pr-4 py-3 text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors font-mono font-medium"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
+                                                <Tag size={10} /> Categoría
+                                            </label>
+                                            <select
+                                                name="categoryId"
+                                                value={formData.categoryId}
+                                                onChange={handleChange}
+                                                className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors appearance-none cursor-pointer"
+                                            >
+                                                {categories.map(cat => (
+                                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
+                                            <Upload size={10} /> URL de Imagen
+                                        </label>
+                                        <div className="flex gap-3">
+                                            <input
+                                                type="url"
+                                                name="image"
+                                                value={formData.image}
+                                                onChange={handleChange}
+                                                className="flex-1 bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground"
+                                                placeholder="https://..."
+                                            />
+                                            <div className="w-11 h-11 rounded-xl bg-muted border border-border flex items-center justify-center overflow-hidden shrink-0">
+                                                {formData.image ? (
+                                                    <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Upload size={16} className="text-muted-foreground/50" />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Availability Switch (Styled like Styled Form) */}
+                                    <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border">
+                                        <span className="text-sm font-medium text-foreground">Disponible para la venta</span>
+                                        <div className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                name="available"
+                                                checked={formData.available}
+                                                onChange={handleChange}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-9 h-5 bg-border rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Column */}
+                                <div className="space-y-5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
+                                            <FileText size={10} /> Descripción
+                                        </label>
+                                        <textarea
+                                            name="description"
+                                            rows="3"
+                                            value={formData.description}
+                                            onChange={handleChange}
+                                            className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors resize-none placeholder:text-muted-foreground"
+                                            placeholder="Describe los sabores..."
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1 flex items-center gap-1.5">
+                                            <List size={10} /> Ingredientes
+                                        </label>
+                                        <textarea
+                                            name="ingredients"
+                                            rows="3"
+                                            value={formData.ingredients}
+                                            onChange={handleChange}
+                                            className="w-full bg-input border border-border rounded-xl px-3 py-3 text-sm text-foreground focus:border-primary/50 outline-none focus:outline-none focus:ring-0 transition-colors resize-none placeholder:text-muted-foreground"
+                                            placeholder="Separados por coma..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer Actions */}
+                            <div className="pt-2 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="px-6 py-3 rounded-xl text-muted-foreground font-medium hover:bg-muted hover:text-foreground transition-colors outline-none focus:outline-none"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all outline-none focus:outline-none"
+                                >
+                                    {initialData ? 'Guardar Cambios' : 'Crear Plato'}
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
                 </motion.div>
-            </motion.div>
+            )}
         </AnimatePresence>
     );
 }

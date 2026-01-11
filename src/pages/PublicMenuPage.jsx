@@ -82,7 +82,10 @@ export default function PublicMenuPage() {
                 >
                     Todos
                 </button>
-                {categories.map(cat => (
+                {categories.filter(cat => {
+                    // Only show categories that have at least one AVAILABLE product
+                    return products.some(p => p.categoryId === cat.id && p.available);
+                }).map(cat => (
                     <button
                         key={cat.id}
                         onClick={() => setActiveCategory(cat.id)}
