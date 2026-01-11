@@ -11,6 +11,7 @@ import {
     Clock,
     User,
     Menu,
+    BookOpen,
     X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -243,6 +244,7 @@ const DashboardLayout = () => {
                     </motion.div>
 
                     <SidebarItem to="/dashboard/reservations" icon={CalendarClock} label="Reservas" isCollapsed={isCollapsed} />
+                    <SidebarItem to="/dashboard/menu" icon={BookOpen} label="Gestión de Menú" isCollapsed={isCollapsed} />
                     <SidebarItem to="/dashboard" icon={LayoutDashboard} label="Estadísticas" isCollapsed={isCollapsed} />
 
                     <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent w-full" />
@@ -447,6 +449,7 @@ const DashboardLayout = () => {
 const pathnameToTitle = (path) => {
     if (path === "/dashboard") return "Visión General";
     if (path === "/dashboard/reservations") return "Gestión de Reservas";
+    if (path === "/dashboard/menu") return "Gestión de Menú";
     return `Sistema ${clientConfig.name}`;
 };
 

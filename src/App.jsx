@@ -15,6 +15,8 @@ import RequireAuth from "./components/auth/RequireAuth"; // Nuestro "Patovica"
 import LoginPage from "./pages/LoginPage"; // La nueva entrada
 import DashboardPage from "./pages/DashboardPage";
 import ReservationsPage from "./pages/ReservationsPage";
+import MenuManagerPage from "./pages/MenuManagerPage";
+import PublicMenuPage from "./pages/PublicMenuPage";
 
 // 👇 UTILS
 import { clientConfig } from "./config/client";
@@ -49,6 +51,9 @@ const AppContent = () => {
           {/* 🟢 RUTA PÚBLICA: Login */}
           <Route path="/login" element={<LoginPage />} />
 
+          {/* 📱 RUTA PÚBLICA: Menú Digital (QR) */}
+          <Route path="/menu-digital" element={<PublicMenuPage />} />
+
           {/* 🔴 RUTAS PRIVADAS: Dashboard */}
           <Route
             path="/dashboard"
@@ -63,6 +68,9 @@ const AppContent = () => {
 
             {/* Reservas: /dashboard/reservations */}
             <Route path="reservations" element={<ReservationsPage />} />
+
+            {/* Menú: /dashboard/menu */}
+            <Route path="menu" element={<MenuManagerPage />} />
           </Route>
 
           {/* 🔄 REDIRECCIONES */}
