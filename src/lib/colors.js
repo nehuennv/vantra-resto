@@ -57,11 +57,10 @@ export const getContrastColor = (hex) => {
 
     // Calcular ratio con Blanco (L=1) y Negro (L=0)
     // Formula: (L1 + 0.05) / (L2 + 0.05)
+    // Usamos un umbral de luminancia (L > 0.45) para preferir texto blanco
+    // en colores medios/saturados (como Blue-500) que matemáticamente tienen mejor
+    // contraste con negro pero estéticamente y por convención usan blanco.
+    // El umbral estándar suele ser 0.179, pero para UI moderna ~0.45 es más común.
 
-    const whiteRatio = (1.05) / (L + 0.05);
-    const blackRatio = (L + 0.05) / 0.05;
-
-    // Si el negro tiene mejor contraste, devolver oscuro. Si no, claro.
-    // Usamos los mismos valores HSL de retorno que antes para mantener consistencia de diseño
-    return (blackRatio > whiteRatio) ? '222 47% 11%' : '210 40% 98%';
+    return (L > 0.45) ? '222 47% 11%' : '210 40% 98%';
 };

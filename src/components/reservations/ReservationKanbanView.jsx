@@ -217,14 +217,16 @@ export default function ReservationKanbanView({ reservations, onUpdate }) {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex-1 w-full h-full overflow-x-auto overflow-y-hidden p-4">
+            {/* Added snap scrolling for mobile/tablet */}
+            <div className="flex-1 w-full h-full overflow-x-auto overflow-y-hidden p-4 snap-x snap-mandatory">
                 <div className="flex h-full gap-4 min-w-fit items-stretch">
                     {Object.keys(STATUS_CONFIG).map(status => (
-                        <DroppableColumn
-                            key={status}
-                            statusKey={status}
-                            items={grouped[status]}
-                        />
+                        <div key={status} className="snap-center h-full">
+                            <DroppableColumn
+                                statusKey={status}
+                                items={grouped[status]}
+                            />
+                        </div>
                     ))}
                 </div>
             </div>

@@ -19,7 +19,7 @@ const BentoCard = ({
             transition={{ duration: 0.5, delay: delay, ease: "easeOut" }}
             className={cn(
                 // --- 1. SUPERFICIE SEMÁNTICA (Regla 2) ---
-                "relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm backdrop-blur-sm",
+                "relative flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-border bg-card p-4 sm:p-5 lg:p-6 shadow-sm backdrop-blur-sm",
                 "hover:border-primary/30 hover:shadow-md transition-all duration-300 group",
 
                 // --- 2. GRADIENTE SEMÁNTICO (Opcional) ---
@@ -32,16 +32,16 @@ const BentoCard = ({
 
             {/* Header de la Tarjeta */}
             {(title || Icon) && (
-                <div className="flex items-center justify-between mb-6 z-10 relative">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between mb-4 sm:mb-6 z-10 relative">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         {Icon && (
                             // Icono con rol funcional: bg-muted y texto dinámico
-                            <div className="p-2 rounded-xl bg-muted text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all duration-300">
-                                <Icon size={18} />
+                            <div className="p-1.5 sm:p-2 rounded-xl bg-muted text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all duration-300">
+                                <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
                             </div>
                         )}
                         {/* --- 3. TIPOGRAFÍA SEMÁNTICA (Regla 2) --- */}
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors duration-300">
                             {title}
                         </span>
                     </div>

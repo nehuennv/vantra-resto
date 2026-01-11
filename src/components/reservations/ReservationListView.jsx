@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Users, MessageCircle, Phone, CheckCircle2,
@@ -7,19 +7,8 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useTheme } from "../../context/ThemeContext";
-
-// --- UTILIDADES ---
-const getCurrentTime = () => new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
-
-const formatDateCreated = (dateString) => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    // Formato completo dd-mm-aaaa
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-};
+import { useReservationGrouping } from '../../hooks/useReservationGrouping';
+import { getCurrentTimeLocal, formatDateCreated } from '../../lib/dateUtils';
 
 // --- NUEVO COMPONENTE: SEPARADOR DE HORARIO (FRANJA 1H) ---
 const TimeGroupHeader = ({ time, count }) => (
@@ -116,64 +105,65 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
             animate={{ opacity: 1 }}
             className={cn(
                 "group relative w-full overflow-hidden transition-all duration-200", // Quitamos cursor-pointer global
-                "bg-card border rounded-lg shadow-sm hover:z-10", // Added hover:z-10 para que no se corte el efecto
+                "bg-card border border-border/60 rounded-lg shadow-sm hover:shadow-md hover:bg-card/80 hover:border-primary/20 hover:z-10", // Mejor feedback hover
                 "border-l-[4px]", // Borde indicador sólido pero no invasivo
                 style.borderLeft,
                 isSelected
                     ? "ring-1 ring-inset ring-primary/20 shadow-md border-y-primary/20 border-r-primary/20"
-                    : "border-y-border border-r-border hover:brightness-125 hover:shadow-md"
+                    : "border-y-border/60 border-r-border/60 hover:brightness-105" // Ajuste sutil borde
             )}
         >
-            {/* --- GRID ESTRUCTURAL (Layout Fijo) --- */}
+            {/* --- GRID ESTRUCTURAL (Layout Apretado en Mobile) --- */}
             {/* El click ahora vive SOLO en el encabezado */}
             <div
                 onClick={() => { onClick(res.id); setConfirmAction(null); }}
-                className="grid grid-cols-[auto_1fr_auto] gap-4 p-4 items-center cursor-pointer"
+                className="grid grid-cols-[auto_1fr_auto] gap-3 sm:gap-4 p-3 sm:p-4 items-center cursor-pointer"
             >
 
-                {/* 1. TIME BOX (Datos Duros) */}
+                {/* 1. TIME BOX (Compacto en Mobile) */}
                 <div className={cn(
-                    "flex flex-col items-center justify-center w-14 h-14 rounded-md border border-transparent transition-colors",
+                    "flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-md border border-transparent transition-colors",
                     style.timeBox // Hereda color sutil del estado
                 )}>
-                    <span className="text-lg font-bold tabular-nums leading-none tracking-tight">
+                    <span className="text-base sm:text-lg font-bold tabular-nums leading-none tracking-tight">
                         {res.time}
                     </span>
-                    <span className="text-[9px] font-bold uppercase opacity-60 mt-0.5">HS</span>
+                    <span className="text-[8px] sm:text-[9px] font-bold uppercase opacity-60 mt-0.5">HS</span>
                 </div>
 
-                {/* 2. DATOS DEL CLIENTE (Flow) */}
+                {/* 2. DATOS DEL CLIENTE (Fluid Text) */}
                 <div className="flex flex-col justify-center min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                         <h3 className={cn(
-                            "text-base font-bold truncate leading-none",
+                            "text-sm sm:text-base font-bold truncate leading-none",
                             "text-foreground"
                         )}>
                             {res.name}
                         </h3>
                         {/* Indicador de Notas sutil */}
                         {res.tags?.length > 0 && (
-                            <div className="flex items-center justify-center w-4 h-4 rounded-full bg-muted text-[10px] text-muted-foreground" title="Ver notas">
+                            <div className="flex items-center justify-center w-4 h-4 rounded-full bg-muted text-[10px] text-muted-foreground shrink-0" title="Ver notas">
                                 <Hash size={10} />
                             </div>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-muted/30 border border-border/50">
+                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                        <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-muted/30 border border-border/50 whitespace-nowrap">
                             <Users size={12} strokeWidth={2.5} />
                             <span className="font-semibold text-foreground tabular-nums">{res.pax}</span>
                         </div>
-                        <span className="text-border">|</span>
-                        <div className="flex items-center gap-1.5 capitalize text-xs">
+                        <span className="hidden sm:inline text-border">|</span>
+                        <div className="flex items-center gap-1.5 capitalize truncate">
                             {res.origin === 'whatsapp' ? <MessageCircle size={12} /> : res.origin === 'walk-in' ? <Store size={12} /> : <Phone size={12} />}
-                            {res.origin === 'walk-in' ? 'Presencial' : res.origin}
+                            <span className="truncate max-w-[80px] sm:max-w-none">{res.origin === 'walk-in' ? 'Presencial' : res.origin}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* 3. ESTADO (Visual) */}
+                {/* 3. ESTADO (Icon Only on Mobile, Full Badge on Desktop) */}
                 <div className="flex items-center gap-3">
+                    {/* Badge Desktop */}
                     {!isSelected && (
                         <div className={cn(
                             "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[10px] font-bold uppercase tracking-wider",
@@ -182,6 +172,13 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                             <StatusIcon size={12} strokeWidth={2.5} />
                             {style.label}
                         </div>
+                    )}
+                    {/* Mobile Dot Indicator */}
+                    {!isSelected && (
+                        <div className={cn(
+                            "flex sm:hidden w-2 h-2 rounded-full",
+                            style.bar || (style.badgeText.includes('amber') ? 'bg-amber-500' : style.badgeText.includes('indigo') ? 'bg-indigo-600' : style.badgeText.includes('emerald') ? 'bg-emerald-500' : 'bg-slate-500')
+                        )} />
                     )}
                     <ChevronDown size={18} className={cn("text-muted-foreground transition-transform duration-200", isSelected && "rotate-180")} />
                 </div>
@@ -193,7 +190,7 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        exit={{ opacity: 0 }}
                         className="border-t border-border bg-muted/20"
                     >
                         <div className="p-4 pt-3">
@@ -227,10 +224,10 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                             </div>
 
                             {/* BOTONERA (Standard Size h-10) */}
-                            <div className="flex items-center gap-3 h-10">
+                            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:h-10">
 
                                 {/* 1. Grupo Herramientas (Botones Acciones) */}
-                                <div className="flex gap-3 shrink-0 h-full">
+                                <div className="flex gap-3 shrink-0 h-10 sm:h-auto">
                                     <motion.button
                                         onClick={(e) => handleAction(e, 'delete', () => onDelete(res.id))}
                                         className={cn(
@@ -242,7 +239,7 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                         title="Eliminar Reserva"
                                     >
                                         <Trash2 size={16} strokeWidth={2.5} />
-                                        <span>{confirmAction === 'delete' ? "¿Confirmar?" : "Eliminar"}</span>
+                                        <span className="hidden sm:inline">{confirmAction === 'delete' ? "¿Confirmar?" : "Eliminar"}</span>
                                     </motion.button>
 
                                     <motion.button
@@ -251,12 +248,12 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                         title="Editar Datos"
                                     >
                                         <Pencil size={16} strokeWidth={2.5} />
-                                        <span>Editar</span>
+                                        <span className="hidden sm:inline">Editar</span>
                                     </motion.button>
                                 </div>
 
                                 {/* 2. Botón Principal (Acción Primaria - Estilo Tinted con Hover Sutil) */}
-                                <div className="flex-1 h-full">
+                                <div className="flex-1 h-10 sm:h-auto">
                                     {res.status === 'pending' && (
                                         <motion.button
                                             onClick={(e) => {
@@ -276,7 +273,7 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                         <motion.button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                onUpdate(res.id, { status: 'seated', time: getCurrentTime() });
+                                                onUpdate(res.id, { status: 'seated', time: getCurrentTimeLocal() });
                                                 onClick(res.id); // Cerrar tarjeta
                                             }}
                                             className="w-full h-full rounded-md bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/20 hover:border-amber-300 transition-all duration-300 font-black text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2"
@@ -325,37 +322,10 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
 // --- LISTA AGRUPADA POR FRANJA HORARIA (BUCKETS 1H) ---
 const ReservationListView = ({ reservations, selectedId, onSelect, onUpdate, onDelete, onEdit }) => {
 
-    // LÓGICA DE AGRUPACIÓN (Bucket de 1 Hora)
-    const groupedReservations = useMemo(() => {
-        const groups = {};
-
-        reservations.forEach(res => {
-            // Extraer solo la hora (Ej: "21:30" -> "21")
-            const hour = res.time.split(':')[0];
-            // Crear la llave del bucket (Ej: "21:00")
-            const bucketKey = `${hour}:00`;
-
-            if (!groups[bucketKey]) {
-                groups[bucketKey] = [];
-            }
-            groups[bucketKey].push(res);
-        });
-
-        // 1. Convertir objeto a array
-        // 2. Ordenar los buckets por hora (11:00 antes que 12:00)
-        return Object.keys(groups).sort().map(time => {
-            // 3. Ordenar las reservas DENTRO del bucket (21:15 antes que 21:45)
-            const sortedItems = groups[time].sort((a, b) => a.time.localeCompare(b.time));
-
-            return {
-                time,
-                items: sortedItems
-            };
-        });
-    }, [reservations]);
+    const groupedReservations = useReservationGrouping(reservations);
 
     return (
-        <div className="flex-1 h-full overflow-y-auto custom-scrollbar p-4 space-y-1 relative">
+        <div className="flex-1 h-full overflow-y-auto custom-scrollbar p-2 sm:p-4 space-y-1 relative">
             <div className="max-w-4xl mx-auto w-full">
                 {groupedReservations.map((group) => (
                     <div key={group.time} className="mb-6">

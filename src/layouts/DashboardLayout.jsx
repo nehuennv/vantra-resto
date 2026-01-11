@@ -9,7 +9,9 @@ import {
     Bell,
     Plus,
     Clock,
-    User
+    User,
+    Menu,
+    X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils"; // Asegurate que esta ruta sea correcta
@@ -49,13 +51,14 @@ const LiveClock = () => {
 };
 
 // Item del Menú: Soluciona el problema de centrado forzando una estructura rígida
-const SidebarItem = ({ to, icon: Icon, label, isCollapsed }) => {
+const SidebarItem = ({ to, icon: Icon, label, isCollapsed, onClick }) => {
     const location = useLocation();
     const isActive = location.pathname === to;
 
     return (
         <NavLink
             to={to}
+            onClick={onClick}
             className={cn(
                 "relative flex items-center h-12 mb-2 transition-all duration-300 rounded-xl group outline-none",
                 // Si está colapsado, centramos el contenido (el icono). Si no, alineación standard.
@@ -165,6 +168,8 @@ const AdminProfile = ({ isCollapsed, onClick, onLogout }) => {
 const DashboardLayout = () => {
     // Estado del sidebar
     const [isCollapsed, setIsCollapsed] = useState(false);
+    // Mobile Notification/Menu State
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Modales y Paneles
     const [showSettings, setShowSettings] = useState(false);
@@ -203,14 +208,14 @@ const DashboardLayout = () => {
     return (
         <div className="flex h-screen overflow-hidden bg-background text-foreground font-sans selection:bg-primary/20">
 
-            {/* SIDEBAR */}
+            {/* SIDEBAR (Desktop - Hidden on mobile) */}
             <motion.aside
                 initial={false}
                 animate={{
                     width: isCollapsed ? 80 : 280
                 }}
                 transition={springTransition}
-                className="relative z-40 flex flex-col h-full bg-background/95 backdrop-blur-2xl border-r border-border/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0"
+                className="relative z-40 hidden lg:flex flex-col h-full bg-background/95 backdrop-blur-2xl border-r border-border/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0"
             >
                 {/* 1. Header del Sidebar (Logo) */}
                 <div className={cn(
@@ -277,7 +282,6 @@ const DashboardLayout = () => {
                 <AdminProfile isCollapsed={isCollapsed} onClick={() => setShowSettings(true)} onLogout={handleLogout} />
 
                 {/* 4. Botón de Colapso (Flotante) */}
-                {/* 4. Botón de Colapso (Flotante) */}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
                     className="absolute -right-3 top-20 -translate-y-1/2 z-50 flex items-center justify-center w-6 h-6 bg-background border border-border shadow-md rounded-full text-muted-foreground hover:text-primary transition-colors focus:outline-none"
@@ -292,35 +296,110 @@ const DashboardLayout = () => {
 
             </motion.aside>
 
+            {/* MOBILE NAVIGATION DRAWER (Only < lg) */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden"
+                        />
+
+                        {/* Drawer */}
+                        <motion.div
+                            initial={{ x: "-100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            className="fixed inset-y-0 left-0 w-[280px] bg-background border-r border-border z-50 lg:hidden flex flex-col shadow-2xl"
+                        >
+                            <div className="h-20 px-6 flex items-center justify-between border-b border-border/40">
+                                <BrandLogo collapsed={false} />
+                                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 -mr-2 text-muted-foreground hover:text-foreground">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+                                <SidebarItem
+                                    to="/dashboard/reservations"
+                                    icon={CalendarClock}
+                                    label="Reservas"
+                                    isCollapsed={false}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                />
+                                <SidebarItem
+                                    to="/dashboard"
+                                    icon={LayoutDashboard}
+                                    label="Estadísticas"
+                                    isCollapsed={false}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                />
+
+                                <div className="my-4 h-px bg-border/50 w-full" />
+
+                                <button
+                                    onClick={() => { setShowSettings(true); setIsMobileMenuOpen(false); }}
+                                    className="w-full relative flex items-center h-12 px-3 rounded-xl group outline-none transition-colors hover:bg-muted"
+                                >
+                                    <div className="flex items-center justify-center w-10 h-10 shrink-0">
+                                        <Settings size={20} className="text-muted-foreground group-hover:text-foreground" />
+                                    </div>
+                                    <div className="ml-2">
+                                        <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">Configuración</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <AdminProfile isCollapsed={false} onClick={() => { setShowSettings(true); setIsMobileMenuOpen(false); }} onLogout={handleLogout} />
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
             {/* MAIN AREA */}
             <main className="flex-1 relative flex flex-col min-w-0 overflow-hidden bg-muted/5">
 
                 {/* Header Superior */}
-                <header className="h-20 px-8 flex items-center justify-between sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40">
+                <header className="h-20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40">
 
-                    {/* Títulos Animados */}
-                    <div className="flex flex-col justify-center gap-0.5">
-                        <AnimatePresence mode="wait">
-                            <motion.h2
-                                key={location.pathname}
-                                initial={{ opacity: 0, y: 10, filter: "blur(5px)" }}
-                                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                exit={{ opacity: 0, y: -10, filter: "blur(5px)" }}
-                                transition={{ duration: 0.3 }}
-                                className="text-xl font-bold text-foreground font-jakarta tracking-tight"
-                            >
-                                {pathnameToTitle(location.pathname)}
-                            </motion.h2>
-                        </AnimatePresence>
+                    {/* Left: Mobile Menu Trigger + Title */}
+                    <div className="flex items-center gap-4">
+                        {/* Mobile Toggle */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="lg:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground"
+                        >
+                            <Menu size={24} />
+                        </button>
 
-                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            {clientConfig.branchName || "Sucursal Central"}
+                        <div className="flex flex-col justify-center gap-0.5">
+                            <AnimatePresence mode="wait">
+                                <motion.h2
+                                    key={location.pathname}
+                                    initial={{ opacity: 0, y: 10, filter: "blur(5px)" }}
+                                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                    exit={{ opacity: 0, y: -10, filter: "blur(5px)" }}
+                                    transition={{ duration: 0.3 }}
+                                    className="text-lg md:text-xl font-bold text-foreground font-jakarta tracking-tight truncate max-w-[200px] md:max-w-none"
+                                >
+                                    {pathnameToTitle(location.pathname)}
+                                </motion.h2>
+                            </AnimatePresence>
+
+                            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                {clientConfig.branchName || "Sucursal Central"}
+                            </div>
                         </div>
                     </div>
 
                     {/* Acciones del Header */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 md:gap-4">
                         <LiveClock />
 
                         <div className="h-8 w-px bg-border/60 mx-2 hidden md:block"></div>
@@ -336,7 +415,7 @@ const DashboardLayout = () => {
                         </button>
 
                         {/* Botón Mobile */}
-                        <button onClick={() => handleOpenModal()} className="md:hidden flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg">
+                        <button onClick={() => handleOpenModal()} className="md:hidden flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg active:scale-95 transition-transform">
                             <Plus size={20} strokeWidth={3} />
                         </button>
 
@@ -349,8 +428,8 @@ const DashboardLayout = () => {
                 </header>
 
                 {/* Contenido Dinámico */}
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth custom-scrollbar">
-                    <div className="max-w-[1920px] mx-auto">
+                <div className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth custom-scrollbar">
+                    <div className="max-w-[1920px] mx-auto h-full">
                         <Outlet context={{ openModal: handleOpenModal }} />
                     </div>
                 </div>

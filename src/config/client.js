@@ -30,10 +30,10 @@ const COLOR_VARIANTS = {
 };
 
 // <--- CAMBIA ESTO PARA PROBAR COLORES
-const ACTIVE_COLOR = COLOR_VARIANTS.AcidGreen;
+const ACTIVE_COLOR = COLOR_VARIANTS.Terracotta;
 
 export const clientConfig = {
-    // --- IDENTIDAD ---
+
     name: "La Cabrera",
     shortName: "Cabrera",
     themeColor: ACTIVE_COLOR,

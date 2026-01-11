@@ -26,16 +26,16 @@ import AnimatedSwitch from "@/components/ui/AnimatedSwitch";
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-border shadow-xl p-4 rounded-2xl min-w-[180px] animate-in fade-in zoom-in-95 duration-200">
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
+            <div className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-border shadow-xl p-3 sm:p-4 rounded-2xl min-w-[140px] sm:min-w-[180px] animate-in fade-in zoom-in-95 duration-200 pointer-events-none z-50">
+                <p className="text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
                     <Clock size={12} /> {label} HS
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                     {payload.map((entry, index) => (
-                        <div key={index} className="flex justify-between items-center text-sm">
+                        <div key={index} className="flex justify-between items-center text-xs sm:text-sm">
                             <div className="flex items-center gap-2">
                                 <div
-                                    className="w-2 h-2 rounded-full shadow-[0_0_8px_currentcolor]"
+                                    className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shadow-[0_0_8px_currentcolor]"
                                     style={{ backgroundColor: entry.color, color: entry.color }}
                                 />
                                 <span className="text-foreground font-medium">{entry.name}</span>
@@ -157,11 +157,11 @@ const DashboardPage = () => {
             {/* 2. COMPONENTE SCROLLAREA: Este maneja el scroll ahora */}
             <ScrollArea className="h-full w-full">
 
-                {/* 3. WRAPPER INTERNO: Aquí damos el padding y el espacio entre elementos */}
-                <div className="flex flex-col space-y-5 p-2 lg:p-4 pb-20">
+                {/* 3. WRAPPER INTERNO: Padding reactivo mejorado */}
+                <div className="flex flex-col space-y-4 sm:space-y-6 pt-2 px-3 pb-24 md:p-6 lg:p-8">
 
                     {/* --- HEADER CONTROL --- */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
                         <div className="flex items-center gap-4">
                             {isSplitMode && (
                                 <AnimatedSwitch
@@ -171,33 +171,35 @@ const DashboardPage = () => {
                                         { value: 'lunch', label: 'Mediodía', icon: Sun },
                                         { value: 'dinner', label: 'Noche', icon: Moon }
                                     ]}
-                                    className="w-[260px] h-11 backdrop-blur-sm"
+                                    // Ancho flexible para mobile
+                                    className="w-full sm:w-[260px] h-10 sm:h-11 backdrop-blur-sm"
                                 />
                             )}
                         </div>
 
                         {/* Status Indicator */}
-                        <div className="flex items-center gap-4">
-                            <div className="text-right hidden md:block">
+                        <div className="flex items-center gap-4 self-end sm:self-auto">
+                            <div className="text-right">
                                 <div className="flex items-center justify-end gap-2">
                                     <span className="relative flex h-2 w-2">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                     </span>
-                                    <span className="text-xs font-bold text-foreground tracking-widest uppercase">En Vivo</span>
+                                    <span className="text-[10px] sm:text-xs font-bold text-foreground tracking-widest uppercase">En Vivo</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* --- KPIs PRINCIPALES --- */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
+                    {/* Responsive Grid: 1 col on XS, 2 col on SM, 4 col on LG */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 shrink-0">
 
                         <BentoCard title="Mesas Activas" icon={CalendarCheck} delay={0.1}>
                             <div className="flex items-baseline gap-2 mt-auto">
-                                <span className="text-4xl font-bold text-foreground tabular-nums">{totalReservations}</span>
+                                <span className="text-3xl sm:text-4xl font-bold text-foreground tabular-nums">{totalReservations}</span>
                                 {totalReservations > 0 && (
-                                    <span className="text-emerald-500 text-xs font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center">
+                                    <span className="text-emerald-500 text-[10px] sm:text-xs font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center">
                                         <TrendingUp size={10} className="mr-1" /> ON
                                     </span>
                                 )}
@@ -206,15 +208,15 @@ const DashboardPage = () => {
 
                         <BentoCard title="Comensales" icon={Users} delay={0.15}>
                             <div className="flex items-baseline gap-2 mt-auto">
-                                <span className="text-4xl font-bold text-foreground tabular-nums">{totalPax}</span>
-                                <span className="text-muted-foreground text-xs font-medium uppercase">pax</span>
+                                <span className="text-3xl sm:text-4xl font-bold text-foreground tabular-nums">{totalPax}</span>
+                                <span className="text-muted-foreground text-[10px] sm:text-xs font-medium uppercase">pax</span>
                             </div>
                         </BentoCard>
 
                         <BentoCard title="Ocupación" icon={Percent} delay={0.2}>
                             <div className="flex justify-between items-end mb-2 mt-auto">
-                                <span className="text-4xl font-bold text-foreground tabular-nums">{occupancyPercentage}%</span>
-                                <span className="text-xs font-mono text-muted-foreground">{totalPax}/{maxCap}</span>
+                                <span className="text-3xl sm:text-4xl font-bold text-foreground tabular-nums">{occupancyPercentage}%</span>
+                                <span className="text-[10px] sm:text-xs font-mono text-muted-foreground">{totalPax}/{maxCap}</span>
                             </div>
                             <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
                                 <motion.div
@@ -228,20 +230,21 @@ const DashboardPage = () => {
 
                         <BentoCard title="Automatización" icon={Bot} delay={0.25}>
                             <div className="flex items-baseline gap-2 mt-auto">
-                                <span className="text-4xl font-bold text-foreground tabular-nums">
+                                <span className="text-3xl sm:text-4xl font-bold text-foreground tabular-nums">
                                     {totalReservations > 0 ? Math.round((botCount / totalReservations) * 100) : 0}%
                                 </span>
-                                <span className="text-muted-foreground text-xs uppercase">vía Bot</span>
+                                <span className="text-muted-foreground text-[10px] sm:text-xs uppercase">vía Bot</span>
                             </div>
                         </BentoCard>
                     </div>
 
                     {/* --- GRÁFICOS E INTELIGENCIA --- */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
-                        <BentoCard title="Demanda vs. Histórico" icon={Clock} delay={0.3} className="lg:col-span-2 min-h-[350px]">
-                            <div className="flex-1 w-full min-h-0 mt-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 flex-1 min-h-0">
+                        {/* Area Chart: Min-Height reduced for mobile */}
+                        <BentoCard title="Demanda vs. Histórico" icon={Clock} delay={0.3} className="lg:col-span-2 min-h-[280px] sm:min-h-[350px]">
+                            <div className="flex-1 w-full min-h-0 mt-4 -ml-2 sm:ml-0">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={comparisonChartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                                    <AreaChart data={comparisonChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.4} />
@@ -249,8 +252,8 @@ const DashboardPage = () => {
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} opacity={0.5} />
-                                        <XAxis dataKey="time" stroke={chartColors.text} fontSize={11} tickLine={false} axisLine={false} dy={10} />
-                                        <YAxis stroke={chartColors.text} fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}p`} />
+                                        <XAxis dataKey="time" stroke={chartColors.text} fontSize={10} tickLine={false} axisLine={false} dy={10} interval="preserveStartEnd" />
+                                        <YAxis stroke={chartColors.text} fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}`} width={25} />
                                         <Tooltip content={<CustomTooltip />} />
                                         <Area type="monotone" dataKey="historical" stroke={chartColors.secondary} strokeWidth={2} strokeDasharray="4 4" fill="transparent" name="Promedio" />
                                         <Area type="monotone" dataKey="actual" stroke={chartColors.primary} strokeWidth={3} fill="url(#colorActual)" name="Hoy" animationDuration={1500} />
@@ -259,27 +262,28 @@ const DashboardPage = () => {
                             </div>
                         </BentoCard>
 
-                        <BentoCard title="Canal de Entrada" icon={Smartphone} delay={0.35} className="lg:col-span-1 min-h-[350px]">
-                            <div className="flex flex-col h-full justify-center gap-6">
-                                <div className="h-[200px] relative">
+                        {/* Pie Chart: Compact on mobile */}
+                        <BentoCard title="Canal de Entrada" icon={Smartphone} delay={0.35} className="lg:col-span-1 min-h-[300px] sm:min-h-[350px]">
+                            <div className="flex flex-col h-full justify-center gap-4 sm:gap-6">
+                                <div className="h-[180px] sm:h-[200px] relative">
                                     {totalReservations > 0 ? (
                                         <>
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <PieChart>
-                                                    <Pie data={sourceData} innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value" stroke="none" cornerRadius={4}>
+                                                    <Pie data={sourceData} innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value" stroke="none" cornerRadius={4}>
                                                         {sourceData.map((e, i) => <Cell key={i} fill={e.color} />)}
                                                     </Pie>
                                                 </PieChart>
                                             </ResponsiveContainer>
                                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                                <Bot size={24} className="text-foreground mb-1" />
-                                                <span className="text-2xl font-bold text-foreground">{botCount}</span>
-                                                <span className="text-[9px] uppercase tracking-widest text-muted-foreground">Auto</span>
+                                                <Bot size={20} className="text-foreground mb-1 sm:w-6 sm:h-6" />
+                                                <span className="text-xl sm:text-2xl font-bold text-foreground">{botCount}</span>
+                                                <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-muted-foreground">Auto</span>
                                             </div>
                                         </>
                                     ) : (
                                         <div className="h-full flex flex-col items-center justify-center opacity-30 text-foreground">
-                                            <Bot size={40} className="mb-2" />
+                                            <Bot size={32} className="mb-2 sm:w-10 sm:h-10" />
                                             <p className="text-xs">Sin datos aún</p>
                                         </div>
                                     )}
@@ -301,7 +305,7 @@ const DashboardPage = () => {
                         </BentoCard>
 
                         {/* VANTRA INTELLIGENCE */}
-                        <BentoCard title='ASISTENTE IA' icon={Sparkles} delay={0.4} className="lg:col-span-1 min-h-[180px]">
+                        <BentoCard title='ASISTENTE IA' icon={Sparkles} delay={0.4} className="lg:col-span-1 min-h-[220px] sm:min-h-[180px]">
                             <div className="flex flex-col h-full justify-between mt-2">
                                 <div className="flex gap-4 items-start">
                                     <div className={cn(
@@ -314,7 +318,7 @@ const DashboardPage = () => {
                                         <Activity size={20} />
                                     </div>
                                     <div className="flex flex-col">
-                                        <h4 className={cn("text-sm font-bold transition-colors",
+                                        <h4 className={cn("text-xs sm:text-sm font-bold transition-colors line-clamp-1",
                                             aiReport.color === 'rose' ? "text-rose-500" :
                                                 aiReport.color === 'amber' ? "text-amber-500" :
                                                     aiReport.color === 'blue' ? "text-blue-500" :
@@ -322,14 +326,14 @@ const DashboardPage = () => {
                                         )}>
                                             {featuredInsight?.title || aiReport.mainHeadline}
                                         </h4>
-                                        <p className="text-xs text-muted-foreground font-medium leading-relaxed line-clamp-2 mt-1">
+                                        <p className="text-[11px] sm:text-xs text-muted-foreground font-medium leading-relaxed line-clamp-2 mt-1">
                                             "{featuredInsight?.text || "Analizando operaciones..."}"
                                         </p>
                                     </div>
                                 </div>
-                                <div className="mt-5 pt-4 border-t border-border flex items-center justify-between gap-3">
+                                <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                                     <div className={cn(
-                                        "px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider border flex items-center gap-2 transition-colors shrink-0",
+                                        "px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider border flex items-center gap-2 transition-colors shrink-0 justify-center sm:justify-start",
                                         aiReport.color === 'rose' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" :
                                             aiReport.color === 'amber' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
                                                 aiReport.color === 'blue' ? "bg-blue-500/10 border-blue-500/20 text-blue-500" :
@@ -343,7 +347,7 @@ const DashboardPage = () => {
                                         )} />
                                         {aiReport.label}
                                     </div>
-                                    <button onClick={() => setInsightModalOpen(true)} className="flex-1 bg-muted hover:bg-border border border-border text-foreground text-xs font-bold py-2 px-3 rounded-lg transition-all active:scale-95 flex items-center justify-center">
+                                    <button onClick={() => setInsightModalOpen(true)} className="flex-1 bg-muted hover:bg-border border border-border text-foreground text-xs font-bold py-2.5 sm:py-2 px-3 rounded-lg transition-all active:scale-95 flex items-center justify-center">
                                         Ver Diagnóstico
                                     </button>
                                 </div>
