@@ -12,6 +12,8 @@ import {
     BookOpen,
     Menu,
     X,
+    PanelLeftClose,
+    PanelLeftOpen,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
@@ -40,7 +42,7 @@ const LiveClock = () => {
     }, []);
 
     return (
-        <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-background/50 border border-border/50 text-muted-foreground shadow-sm backdrop-blur-sm">
+        <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-background/40 border border-white/10 text-muted-foreground shadow-sm backdrop-blur-md">
             <Clock size={14} className="text-primary" />
             <span className="text-xs font-bold text-foreground tabular-nums tracking-wide">
                 {time.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}
@@ -58,21 +60,21 @@ const SidebarItem = ({ to, icon: Icon, label, isCollapsed, onClick }) => {
             to={to}
             onClick={onClick}
             className={cn(
-                "relative flex items-center h-12 mb-2 transition-all duration-300 rounded-xl group outline-none",
-                isCollapsed ? "justify-center px-0" : "px-3",
-                isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
+                "relative flex items-center h-12 mb-2 transition-all duration-300 rounded-2xl group outline-none overflow-hidden",
+                isCollapsed ? "justify-center px-0 mx-2" : "px-4 mx-2",
+                isActive ? "text-primary font-bold bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             )}
         >
             {isActive && (
                 <motion.div
                     layoutId="active-pill"
-                    className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.05)]"
+                    className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-2xl"
                     initial={false}
                     transition={springTransition}
                 />
             )}
 
-            <div className="relative z-10 flex items-center justify-center w-10 h-10 shrink-0">
+            <div className="relative z-10 flex items-center justify-center w-6 h-6 shrink-0">
                 <Icon
                     size={20}
                     strokeWidth={isActive ? 2.5 : 2}
@@ -96,14 +98,14 @@ const SidebarItem = ({ to, icon: Icon, label, isCollapsed, onClick }) => {
                         x: springTransition,
                         opacity: { duration: 0.2, delay: isCollapsed ? 0 : 0.15 }
                     }}
-                    className={cn("whitespace-nowrap", isCollapsed ? "pl-0" : "pl-2")}
+                    className={cn("whitespace-nowrap", isCollapsed ? "pl-0" : "pl-3")}
                 >
                     <span className="text-sm tracking-tight">{label}</span>
                 </motion.div>
             </div>
 
             {isCollapsed && (
-                <div className="absolute left-full ml-4 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl">
+                <div className="absolute left-full ml-4 px-3 py-1.5 bg-foreground text-background text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl translate-x-2 group-hover:translate-x-0 duration-200">
                     {label}
                 </div>
             )}
@@ -116,16 +118,16 @@ const AdminProfile = ({ isCollapsed, onClick, onLogout }) => {
         <div
             onClick={onClick}
             className={cn(
-                "mt-auto border-t border-border/60 bg-background/30 backdrop-blur-md cursor-pointer transition-colors hover:bg-muted/50 group overflow-hidden",
-                isCollapsed ? "p-3 flex justify-center" : "p-4"
+                "mt-auto border-t border-white/10 bg-black/5 cursor-pointer transition-colors hover:bg-black/10 group overflow-hidden backdrop-blur-sm",
+                isCollapsed ? "p-2 flex justify-center" : "p-4"
             )}
         >
             <div className={cn("flex items-center transition-all", isCollapsed ? "justify-center gap-0" : "gap-3")}>
                 <div className="relative shrink-0">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20 shadow-lg group-hover:border-primary/50 transition-colors">
-                        <User size={18} className="text-primary" />
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20 shadow-lg group-hover:border-primary/50 transition-colors">
+                        <User size={16} className="text-primary" />
                     </div>
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-background rounded-full"></span>
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-background rounded-full"></span>
                 </div>
 
                 <motion.div
@@ -142,7 +144,7 @@ const AdminProfile = ({ isCollapsed, onClick, onLogout }) => {
                     <span className="text-sm font-bold text-foreground leading-none mb-1">
                         Admin {clientConfig.shortName}
                     </span>
-                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
                         Gerente General
                     </span>
                 </motion.div>
@@ -193,26 +195,41 @@ const DashboardLayout = () => {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden bg-background text-foreground font-sans selection:bg-primary/20">
+        <div className="flex h-screen w-full overflow-hidden bg-transparent font-sans text-foreground selection:bg-primary/20 lg:p-4 lg:gap-4 transition-all duration-500">
 
-            {/* SIDEBAR */}
+            {/* SIDEBAR FLOTANTE */}
             <motion.aside
                 initial={false}
-                animate={{ width: isCollapsed ? 80 : 280 }}
+                animate={{ width: isCollapsed ? 90 : 280 }}
                 transition={springTransition}
-                className="relative z-40 hidden lg:flex flex-col h-full bg-background/95 backdrop-blur-2xl border-r border-border/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0"
+                className="relative z-40 hidden lg:flex flex-col h-full bg-card/60 backdrop-blur-2xl border border-white/10 shadow-2xl flex-shrink-0 lg:rounded-3xl" // Quitamos overflow-hidden global para que se vea el botón
             >
-                <div className={cn("h-20 flex items-center transition-all duration-300", isCollapsed ? "justify-center" : "px-6")}>
+                {/* Logo Area (Limpio, sin botón) */}
+                <div className={cn("h-24 flex items-center transition-all duration-300 border-b border-white/5", isCollapsed ? "justify-center" : "px-8")}>
                     <BrandLogo collapsed={isCollapsed} />
                 </div>
 
-                <div className="flex-1 px-3 py-6 space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+                {/* --- BOTÓN FLOTANTE DE COLAPSO (EL REGRESO) --- */}
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="absolute -right-3 top-24 -translate-y-1/2 z-50 flex items-center justify-center w-6 h-6 bg-card border border-white/20 shadow-lg rounded-full text-muted-foreground hover:text-primary hover:scale-110 transition-all duration-200 focus:outline-none"
+                >
+                    <motion.div
+                        animate={{ rotate: isCollapsed ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <ChevronLeft size={14} />
+                    </motion.div>
+                </button>
+
+                {/* Nav Items (Con overflow propio para no cortar el botón de afuera) */}
+                <div className="flex-1 py-6 space-y-2 overflow-y-auto overflow-x-hidden custom-scrollbar px-2">
                     <motion.div
                         animate={{ opacity: isCollapsed ? 0 : 1, height: isCollapsed ? 0 : "auto" }}
                         transition={{ height: springTransition, opacity: { duration: 0.2, delay: isCollapsed ? 0 : 0.15 } }}
-                        className="mb-2 px-3 overflow-hidden"
+                        className="mb-4 px-6 overflow-hidden"
                     >
-                        <h3 className="text-[10px] font-black text-muted-foreground/70 uppercase tracking-[0.2em] whitespace-nowrap">
+                        <h3 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] whitespace-nowrap">
                             Plataforma
                         </h3>
                     </motion.div>
@@ -221,16 +238,16 @@ const DashboardLayout = () => {
                     <SidebarItem to="/dashboard/menu" icon={BookOpen} label="Gestión de Menú" isCollapsed={isCollapsed} />
                     <SidebarItem to="/dashboard" icon={LayoutDashboard} label="Estadísticas" isCollapsed={isCollapsed} />
 
-                    <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent w-full" />
+                    <div className="my-6 mx-6 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
                     <button
                         onClick={() => setShowSettings(true)}
                         className={cn(
-                            "w-full relative flex items-center h-12 rounded-xl group outline-none transition-colors",
-                            isCollapsed ? "justify-center" : "px-3 hover:bg-muted"
+                            "w-full relative flex items-center h-12 rounded-2xl group outline-none transition-colors mx-2 overflow-hidden",
+                            isCollapsed ? "justify-center px-0 w-[calc(100%-16px)]" : "px-4 w-[calc(100%-16px)] hover:bg-muted/50"
                         )}
                     >
-                        <div className="flex items-center justify-center w-10 h-10 shrink-0">
+                        <div className="flex items-center justify-center w-6 h-6 shrink-0">
                             <Settings size={20} className="text-muted-foreground group-hover:text-foreground group-hover:rotate-90 transition-all duration-500" />
                         </div>
                         <div className={cn("relative z-10 overflow-hidden text-left", isCollapsed ? "w-0 flex-none" : "flex-1")}>
@@ -245,7 +262,7 @@ const DashboardLayout = () => {
                                     x: springTransition,
                                     opacity: { duration: 0.2, delay: isCollapsed ? 0 : 0.15 }
                                 }}
-                                className={cn("whitespace-nowrap", isCollapsed ? "pl-0" : "pl-2")}
+                                className={cn("whitespace-nowrap", isCollapsed ? "pl-0" : "pl-3")}
                             >
                                 <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">Configuración</span>
                             </motion.div>
@@ -254,18 +271,9 @@ const DashboardLayout = () => {
                 </div>
 
                 <AdminProfile isCollapsed={isCollapsed} onClick={() => setShowSettings(true)} onLogout={handleLogout} />
-
-                <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="absolute -right-3 top-20 -translate-y-1/2 z-50 flex items-center justify-center w-6 h-6 bg-background border border-border shadow-md rounded-full text-muted-foreground hover:text-primary transition-colors focus:outline-none"
-                >
-                    <motion.div animate={{ rotate: isCollapsed ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                        <ChevronLeft size={14} />
-                    </motion.div>
-                </button>
             </motion.aside>
 
-            {/* MOBILE DRAWER */}
+            {/* ... (Resto del Mobile Drawer y Main igual) ... */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <>
@@ -311,9 +319,8 @@ const DashboardLayout = () => {
                 )}
             </AnimatePresence>
 
-            {/* MAIN AREA */}
-            <main className="flex-1 relative flex flex-col min-w-0 overflow-hidden bg-muted/5">
-                <header className="h-20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40">
+            <main className="flex-1 relative flex flex-col min-w-0 overflow-hidden bg-card/40 backdrop-blur-3xl lg:rounded-3xl lg:border lg:border-white/10 lg:shadow-2xl transition-all">
+                <header className="h-20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 bg-background/50 backdrop-blur-md border-b border-white/5">
                     <div className="flex items-center gap-4">
                         <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground">
                             <Menu size={24} />
@@ -341,9 +348,8 @@ const DashboardLayout = () => {
 
                     <div className="flex items-center gap-2 md:gap-4">
                         <LiveClock />
-                        <div className="h-8 w-px bg-border/60 mx-2 hidden md:block"></div>
+                        <div className="h-8 w-px bg-white/10 mx-2 hidden md:block"></div>
 
-                        {/* Botón de Acción Principal (Dinámico) */}
                         <motion.button
                             onClick={() => headerAction ? headerAction.onClick() : handleOpenModal()}
                             className="group relative hidden md:flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-bold shadow-[0_4px_14px_0_rgba(0,0,0,0.39)] hover:shadow-[0_6px_20px_rgba(var(--primary),0.23)] hover:-translate-y-[1px] transition-all duration-300 overflow-hidden w-[170px] justify-between"
@@ -366,7 +372,6 @@ const DashboardLayout = () => {
                             </div>
                         </motion.button>
 
-                        {/* Botón Mobile (Dinámico) */}
                         <AnimatePresence mode="wait">
                             <motion.button
                                 key={headerAction ? 'custom-mobile' : 'default-mobile'}
@@ -380,16 +385,15 @@ const DashboardLayout = () => {
                             </motion.button>
                         </AnimatePresence>
 
-                        <button className="relative p-2.5 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200">
+                        <button className="relative p-2.5 rounded-xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all duration-200">
                             <Bell size={20} />
-                            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-background"></span>
+                            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-background"></span>
                         </button>
                     </div>
                 </header>
 
                 <div className="flex-1 overflow-y-auto  scroll-smooth custom-scrollbar">
                     <div className="max-w-[1920px] mx-auto h-full">
-                        {/* Se pasa setHeaderAction al contexto del Outlet */}
                         <Outlet context={{ openModal: handleOpenModal, setHeaderAction: setHeaderAction }} />
                     </div>
                 </div>
