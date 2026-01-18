@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import {
     Clock, CheckCircle2, Zap, LogOut,
     Users, MessageCircle, Phone, Store, Hash,
@@ -95,6 +95,7 @@ const KanbanCard = React.forwardRef(({ res, isOverlay, style, className, onClick
     );
 });
 
+// --- 2. WRAPPER DRAGGABLE ---
 const DraggableKanbanCard = ({ res, ...props }) => {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: res.id,
@@ -104,20 +105,22 @@ const DraggableKanbanCard = ({ res, ...props }) => {
     return (
         <motion.div
             ref={setNodeRef}
-            layout
-            initial={{ opacity: 0, scale: 0.9 }}
+            layoutId={res.id} // Magic: Shared layout identity
+            layout // Enable layout animations
+            initial={{ opacity: 0, scale: 0.8 }}
             animate={{
-                opacity: isDragging ? 0 : 1, // Hide original when dragging
+                opacity: isDragging ? 0 : 1,
                 scale: isDragging ? 0.95 : 1,
                 transition: { duration: 0.2 }
             }}
             exit={{
                 opacity: 0,
-                scale: 0.9,
-                transition: { duration: 0.15, ease: "easeIn" }
+                scale: 0.8,
+                transition: { duration: 0.15 }
             }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="mb-3"
+            // Brutal / Native feel physics
+            transition={{ type: "spring", stiffness: 600, damping: 30, mass: 1 }}
+            className="mb-3 outline-none" // outline-none for accessibility clean-up
             {...listeners}
             {...attributes}
         >
@@ -140,22 +143,26 @@ const DroppableColumn = ({ statusKey, items, ...props }) => {
         <div
             ref={setNodeRef}
             className={cn(
-                "flex-shrink-0 w-72 sm:w-80 flex flex-col h-full max-h-full bg-muted/30 border border-border/60 rounded-2xl overflow-hidden transition-all duration-300",
+                "flex-1 min-w-[280px] sm:min-w-[320px] flex flex-col h-full max-h-full bg-muted/30 border border-border/60 rounded-2xl overflow-hidden transition-colors duration-300",
                 isOver ? config.dragParams : "hover:border-border"
             )}
         >
-            <div className={cn("p-3 border-b flex items-center justify-between bg-background/80 backdrop-blur-sm", config.border)}>
+            <div className={cn("p-3 border-b flex items-center justify-between bg-background/80 backdrop-blur-sm relative z-10", config.border)}>
                 <div className="flex items-center gap-2">
                     <Icon size={16} className={config.color} />
                     <h3 className="font-bold text-sm text-foreground">{config.label}</h3>
                 </div>
-                <span className="text-xs font-bold bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
+                <motion.span
+                    layout // Animate count badge changes
+                    className="text-xs font-bold bg-muted px-2 py-0.5 rounded-full text-muted-foreground"
+                >
                     {items.length}
-                </span>
+                </motion.span>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-                <AnimatePresence mode="popLayout">
+            {/* Added overflow-x-hidden to prevent horizontal scrollbars during spring animations */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 custom-scrollbar">
+                <AnimatePresence mode="popLayout" initial={false}>
                     {items.map(res => (
                         <DraggableKanbanCard
                             key={res.id}
@@ -213,7 +220,7 @@ export default function ReservationKanbanView({ reservations, onUpdate }) {
         duration: 0, // Disable return animation for smoother handoff
         sideEffects: defaultDropAnimationSideEffects({
             styles: {
-                active: { opacity: '0.4' },
+                active: { opacity: '0.0' }, // Hide drag overlay immediately on drop so LayoutGroup takes over
             },
         }),
     };
@@ -226,16 +233,18 @@ export default function ReservationKanbanView({ reservations, onUpdate }) {
         >
             {/* Added snap scrolling for mobile/tablet */}
             <div className="flex-1 w-full h-full overflow-x-auto overflow-y-hidden p-4 snap-x snap-mandatory">
-                <div className="flex h-full gap-4 min-w-fit items-stretch">
-                    {Object.keys(STATUS_CONFIG).map(status => (
-                        <div key={status} className="snap-center h-full">
-                            <DroppableColumn
-                                statusKey={status}
-                                items={grouped[status]}
-                            />
-                        </div>
-                    ))}
-                </div>
+                <LayoutGroup>
+                    <div className="flex h-full gap-4 min-w-full lg:min-w-0 items-stretch">
+                        {Object.keys(STATUS_CONFIG).map(status => (
+                            <div key={status} className="snap-center h-full flex-1 min-w-[280px] sm:min-w-[320px]">
+                                <DroppableColumn
+                                    statusKey={status}
+                                    items={grouped[status]}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </LayoutGroup>
             </div>
 
             {mounted ? createPortal(

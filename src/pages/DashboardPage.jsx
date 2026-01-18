@@ -97,6 +97,7 @@ const DashboardPage = () => {
     const maxCap = clientConfig.businessLogic.maxCapacityPax;
     const occupancyPercentage = Math.min(Math.round((totalPax / maxCap) * 100), 100);
     const botCount = filteredReservations.filter(r => r.origin === 'whatsapp').length;
+    const avgPax = totalReservations > 0 ? (totalPax / totalReservations).toFixed(1) : "0.0";
 
     const groupStats = useMemo(() => {
         let c = 0, g = 0, e = 0;
@@ -145,7 +146,7 @@ const DashboardPage = () => {
 
     const sourceData = useMemo(() => {
         return [
-            { name: 'Bot', value: botCount, color: chartColors.primary },
+            { name: 'Bot WhatsApp', value: botCount, color: chartColors.primary },
             { name: 'Manual', value: totalReservations - botCount, color: chartColors.secondary },
         ].filter(d => d.value > 0);
     }, [botCount, totalReservations, chartColors]);
@@ -157,8 +158,8 @@ const DashboardPage = () => {
             {/* 2. COMPONENTE SCROLLAREA: Este maneja el scroll ahora */}
             <ScrollArea className="h-full w-full">
 
-                {/* 3. WRAPPER INTERNO: Padding reactivo mejorado */}
-                <div className="flex flex-col space-y-4 sm:space-y-6 pt-2 px-3 pb-24 md:p-6 lg:p-8">
+                {/* 3. WRAPPER INTERNO: Padding reactivo mejorado para ocupar todo el espacio */}
+                <div className="flex flex-col space-y-4 p-4 sm:p-6 min-h-full">
 
                     {/* --- HEADER CONTROL --- */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
@@ -228,12 +229,12 @@ const DashboardPage = () => {
                             </div>
                         </BentoCard>
 
-                        <BentoCard title="Automatización" icon={Bot} delay={0.25}>
+                        <BentoCard title="Promedio Pax" icon={Users} delay={0.25}>
                             <div className="flex items-baseline gap-2 mt-auto">
                                 <span className="text-3xl sm:text-4xl font-bold text-foreground tabular-nums">
-                                    {totalReservations > 0 ? Math.round((botCount / totalReservations) * 100) : 0}%
+                                    {avgPax}
                                 </span>
-                                <span className="text-muted-foreground text-[10px] sm:text-xs uppercase">vía Bot</span>
+                                <span className="text-muted-foreground text-[10px] sm:text-xs uppercase">pers. / mesa</span>
                             </div>
                         </BentoCard>
                     </div>
@@ -263,7 +264,7 @@ const DashboardPage = () => {
                         </BentoCard>
 
                         {/* Pie Chart: Compact on mobile */}
-                        <BentoCard title="Canal de Entrada" icon={Smartphone} delay={0.35} className="lg:col-span-1 min-h-[300px] sm:min-h-[350px]">
+                        <BentoCard title="Fuentes" icon={Smartphone} delay={0.35} className="lg:col-span-1 min-h-[300px] sm:min-h-[350px]">
                             <div className="flex flex-col h-full justify-center gap-4 sm:gap-6">
                                 <div className="h-[180px] sm:h-[200px] relative">
                                     {totalReservations > 0 ? (
@@ -305,7 +306,7 @@ const DashboardPage = () => {
                         </BentoCard>
 
                         {/* VANTRA INTELLIGENCE */}
-                        <BentoCard title='ASISTENTE IA' icon={Sparkles} delay={0.4} className="lg:col-span-1 min-h-[220px] sm:min-h-[180px]">
+                        <BentoCard title='Diagnóstico IA' icon={Sparkles} delay={0.4} className="lg:col-span-1 min-h-[220px] sm:min-h-[180px]">
                             <div className="flex flex-col h-full justify-between mt-2">
                                 <div className="flex gap-4 items-start">
                                     <div className={cn(

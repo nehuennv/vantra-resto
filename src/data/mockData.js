@@ -95,131 +95,48 @@ const generarReserva = (id, daysOffset, turno) => {
 export const initialReservations = [];
 let reservaId = 1;
 
-// HOY (29 Diciembre 2025) - Normal
-for (let i = 0; i < 3; i++) {
+// HOY (29 Diciembre 2025) - CRITICAL SCENARIO (High Stress/Chaos)
+// Simulamos un servicio completamente saturado con baja automatización y cocina colapsada.
+// Total aprox: ~30 reservas, muchos grupos grandes, todo telefónico/presencial.
+
+// Almuerzo (Tranqui para contraste)
+for (let i = 0; i < 5; i++) {
     initialReservations.push(generarReserva(reservaId++, 0, 'almuerzo'));
 }
-for (let i = 0; i < 7; i++) {
-    initialReservations.push(generarReserva(reservaId++, 0, 'cena'));
-}
 
-// AYER (28 Diciembre)
-for (let i = 0; i < 2; i++) {
-    initialReservations.push(generarReserva(reservaId++, -1, 'almuerzo'));
-}
-for (let i = 0; i < 5; i++) {
-    initialReservations.push(generarReserva(reservaId++, -1, 'cena'));
-}
-
-// ANTEAYER (27 Diciembre)
-for (let i = 0; i < 2; i++) {
-    initialReservations.push(generarReserva(reservaId++, -2, 'almuerzo'));
-}
-for (let i = 0; i < 4; i++) {
-    initialReservations.push(generarReserva(reservaId++, -2, 'cena'));
-}
-
-// HACE 3 DÍAS (26 Diciembre)
-for (let i = 0; i < 3; i++) {
-    initialReservations.push(generarReserva(reservaId++, -3, 'almuerzo'));
-}
-for (let i = 0; i < 6; i++) {
-    initialReservations.push(generarReserva(reservaId++, -3, 'cena'));
-}
-
-// HACE 4 DÍAS (25 Diciembre - Navidad)
-for (let i = 0; i < 4; i++) {
-    initialReservations.push(generarReserva(reservaId++, -4, 'almuerzo'));
-}
-for (let i = 0; i < 8; i++) {
-    initialReservations.push(generarReserva(reservaId++, -4, 'cena'));
-}
-
-// HACE 5-10 DÍAS
-for (let d = -5; d >= -10; d--) {
-    for (let i = 0; i < 1; i++) {
-        initialReservations.push(generarReserva(reservaId++, d, 'almuerzo'));
-    }
-    for (let i = 0; i < 3; i++) {
-        initialReservations.push(generarReserva(reservaId++, d, 'cena'));
-    }
-}
-
-// MAÑANA (30 Diciembre)
-for (let i = 0; i < 2; i++) {
-    initialReservations.push(generarReserva(reservaId++, 1, 'almuerzo'));
-}
-for (let i = 0; i < 5; i++) {
-    initialReservations.push(generarReserva(reservaId++, 1, 'cena'));
-}
-
-// AÑO NUEVO (31 Diciembre)
-for (let i = 0; i < 4; i++) {
-    initialReservations.push(generarReserva(reservaId++, 2, 'almuerzo'));
-}
-for (let i = 0; i < 15; i++) { // Noche de año nuevo
-    const reserva = generarReserva(reservaId++, 2, 'cena');
-    reserva.status = 'confirmed';
-    reserva.tags = [...reserva.tags, 'Año Nuevo'];
-    initialReservations.push(reserva);
-}
-
-// ENERO 2026
-for (let d = 3; d <= 10; d++) {
-    for (let i = 0; i < 1; i++) {
-        initialReservations.push(generarReserva(reservaId++, d, 'almuerzo'));
-    }
-    for (let i = 0; i < 3; i++) {
-        initialReservations.push(generarReserva(reservaId++, d, 'cena'));
-    }
-}
-
-// RESERVAS VIP ESPECIALES HOY
+// CENA - CAOS TOTAL
+// 1. Grupos grandes (Eventos) -> Dispara "Riesgo de Colapso en Cocina"
 initialReservations.push({
-    id: reservaId++,
-    name: "Carlos Tevez",
-    time: "21:15",
-    pax: 6,
-    date: TODAY,
-    phone: "1155559999",
-    status: "confirmed",
-    origin: "phone",
-    tags: ["VIP", "Mesa Privada"],
-    createdAt: TODAY
+    id: reservaId++, name: "Evento Corp. Globant", time: "20:30", pax: 18, date: TODAY, phone: "1155551001",
+    status: "seated", origin: "phone", tags: ["VIP", "Evento", "Menú Pasos"], createdAt: getDateOffset(-10)
+});
+initialReservations.push({
+    id: reservaId++, name: "Cumpleaños Mariana", time: "21:00", pax: 14, date: TODAY, phone: "1155551002",
+    status: "confirmed", origin: "walk-in", tags: ["Cumpleaños", "Torta"], createdAt: getDateOffset(-2)
+});
+initialReservations.push({
+    id: reservaId++, name: "Despedida Juan", time: "21:15", pax: 12, date: TODAY, phone: "1155551003",
+    status: "pending", origin: "phone", tags: ["Ruidoso"], createdAt: getDateOffset(-1)
 });
 
-initialReservations.push({
-    id: reservaId++,
-    name: "Despedida Soltera",
-    time: "21:45",
-    pax: 15,
-    date: TODAY,
-    phone: "1155558888",
-    status: "confirmed",
-    origin: "whatsapp",
-    tags: ["Adelanto Pago", "Ruido", "Cumpleaños"],
-    createdAt: getDateOffset(-3)
-});
+// 2. Inundación de reservas (Alta Automatización)
+// 85% WhatsApp (Bot WhatsApp) para demostrar eficacia del producto
+for (let i = 0; i < 15; i++) {
+    const r = generarReserva(reservaId++, 0, 'cena');
+    // 85% WhatsApp (Bot), resto Phone/Walk-in
+    const rand = Math.random();
+    r.origin = rand > 0.15 ? 'whatsapp' : (rand > 0.5 ? 'phone' : 'walk-in');
 
-// RESERVAS FINALIZADAS HOY (Para probar filtros y scroll)
-for (let i = 0; i < 8; i++) {
-    const r = generarReserva(reservaId++, 0, 'almuerzo');
-    r.status = 'finished';
-    r.time = getRandomTime(12, 13); // Finalizaron temprano
+    r.status = Math.random() > 0.5 ? 'seated' : 'confirmed';
+    r.pax = Math.floor(Math.random() * 4) + 2;
+    r.time = getRandomTime(20, 22);
     initialReservations.push(r);
 }
 
+// 3. Algunas reservas con problemas
 initialReservations.push({
-    id: reservaId++,
-    name: "Cena Empresarial Tech",
-    time: "20:10",
-    pax: 20,
-    date: TODAY,
-    phone: "1155557777",
-    status: "seated",
-    origin: "phone",
-    tags: ["VIP", "Factura A", "Menú Ejecutivo"],
-    createdAt: getDateOffset(-7)
+    id: reservaId++, name: "Mesa Conflictiva", time: "21:30", pax: 4, date: TODAY, phone: "1155559999",
+    status: "seated", origin: "walk-in", tags: ["Quejas Previas", "Alergia Grave"], createdAt: TODAY
 });
 
 // --- DATOS HISTÓRICOS (Para gráficos) ---

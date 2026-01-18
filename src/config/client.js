@@ -12,7 +12,7 @@ const COLOR_VARIANTS = {
     ElectricLime: '#E8EF41',    // Disruptivo, Fast-Casual, Joven
     HotPink: '#EF4178',         // Sushi Bar, Cocktails, Fiesta
     CyanFuture: '#06b6d4',      // Tecnológico, Mariscos, Frío
-    SunsetOrange: '#f97316',    // Burgers, Rápido, Apetitoso
+    SunsetOrange: '#FC7E32',    // Burgers, Rápido, Apetitoso
 
     // --- FRESCOS / NATURALES ---
     MintTeal: '#0AD3A4',        // Vegano, Saludable, Brunch
@@ -26,11 +26,12 @@ const COLOR_VARIANTS = {
 
     // --- TENDENCIA (NEON / CYBER) ---
     NeonViolet: '#d946ef',      // Bar Nocturno, Arcade
-    AcidGreen: '#a3e635',       // Smoothie Bar, Gym Food
+    AcidGreen: '#a3e635', 
+    CerebralBlue: '#6AAAE8',      // Smoothie Bar, Gym Food
 };
 
 // <--- CAMBIA ESTO PARA PROBAR COLORES
-const ACTIVE_COLOR = COLOR_VARIANTS.OceanBlue;
+const ACTIVE_COLOR = COLOR_VARIANTS.SunsetOrange;
 
 export const clientConfig = {
 
