@@ -73,7 +73,7 @@ const ReservationsPage = () => {
     const isEmpty = currentView === 'list' ? listViewReservations.length === 0 : baseReservations.length === 0;
 
     return (
-        <div className="h-full flex flex-col gap-4 relative pb-2 overflow-hidden">
+        <div className="h-full flex flex-col gap-4 relative p-4 overflow-hidden">
 
             {/* --- 1. HEADER GLOBAL --- */}
             <ReservationsHeader

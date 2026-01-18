@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 
@@ -11,49 +11,96 @@ const BentoCard = ({
     headerAction,
     gradient = false
 }) => {
+    const divRef = useRef(null);
+    const [isFocused, setIsFocused] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [opacity, setOpacity] = useState(0);
+
+    const handleMouseMove = (e) => {
+        if (!divRef.current) return;
+        const div = divRef.current;
+        const rect = div.getBoundingClientRect();
+        setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    };
+
+    const handleFocus = () => {
+        setIsFocused(true);
+        setOpacity(1);
+    };
+
+    const handleBlur = () => {
+        setIsFocused(false);
+        setOpacity(0);
+    };
+
+    const handleMouseEnter = () => {
+        setOpacity(1);
+    };
+
+    const handleMouseLeave = () => {
+        setOpacity(0);
+    };
+
     return (
         <motion.div
+            ref={divRef}
+            onMouseMove={handleMouseMove}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ transition: { duration: 0.2 } }}
             transition={{ duration: 0.5, delay: delay, ease: "easeOut" }}
             className={cn(
-                // --- 1. SUPERFICIE SEMÁNTICA (Regla 2) ---
-                "relative flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-border bg-card p-4 sm:p-5 lg:p-6 shadow-sm backdrop-blur-sm",
-                "hover:border-primary/30 hover:shadow-md transition-all duration-300 group",
-
-                // --- 2. GRADIENTE SEMÁNTICO (Opcional) ---
-                gradient && "bg-gradient-to-br from-card to-muted/50",
+                // Base structure: Glassmorphism + Rounded Corners
+                "relative flex flex-col overflow-hidden rounded-3xl border border-border/50 bg-card/50 p-6 shadow-sm backdrop-blur-xl",
+                "transition-all duration-300 group hover:border-primary/30",
                 className
             )}
         >
-            {/* Glow Effect: Dinámico con el color de marca (text-primary) */}
-            <div className="absolute top-0 right-0 -mt-16 -mr-16 h-64 w-64 rounded-full bg-primary/5 blur-[80px] group-hover:bg-primary/10 transition-colors duration-500 opacity-50 pointer-events-none" />
+            {/* --- SPOTLIGHT EFFECT LAYERS --- */}
 
-            {/* Header de la Tarjeta */}
+            {/* 1. Fondo sutil que sigue al mouse */}
+            <div
+                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
+                style={{
+                    opacity,
+                    background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, hsl(var(--primary) / 0.03), transparent 40%)`,
+                }}
+            />
+
+            {/* 2. Borde brillante que sigue al mouse (Masking Trick) */}
+            <div
+                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
+                style={{
+                    opacity,
+                    background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, hsl(var(--primary) / 0.07), transparent 40%)`,
+                    maskImage: "linear-gradient(black, black) content-box, linear-gradient(black, black)",
+                    WebkitMaskImage: "linear-gradient(black, black) content-box, linear-gradient(black, black)",
+                    maskComposite: "exclude",
+                    WebkitMaskComposite: "xor",
+                }}
+            />
+
+            {/* Header Semántico */}
             {(title || Icon) && (
-                <div className="flex items-center justify-between mb-4 sm:mb-6 z-10 relative">
-                    <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center justify-between mb-6 z-20 relative">
+                    <div className="flex items-center gap-3">
                         {Icon && (
-                            // Icono con rol funcional: bg-muted y texto dinámico
-                            <div className="p-1.5 sm:p-2 rounded-xl bg-muted text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all duration-300">
-                                <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
+                            <div className="p-2 rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]">
+                                <Icon size={18} />
                             </div>
                         )}
-                        {/* --- 3. TIPOGRAFÍA SEMÁNTICA (Regla 2) --- */}
-                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                        <span className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground/80">
                             {title}
                         </span>
                     </div>
-
-                    {/* Acción extra: Mantiene el contexto del tema */}
                     {headerAction && <div className="z-20 relative">{headerAction}</div>}
                 </div>
             )}
 
-            {/* --- 4. CONTENIDO PRINCIPAL --- */}
-            {/* text-foreground asegura legibilidad total en Light y Dark */}
-            <div className="flex-1 z-10 relative min-h-0 flex flex-col text-foreground">
+            <div className="flex-1 z-10 relative min-h-0 flex flex-col w-full h-full text-foreground">
                 {children}
             </div>
         </motion.div>

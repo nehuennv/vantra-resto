@@ -82,7 +82,7 @@ export default function MenuManagerPage() {
     const getCategoryCount = (catId) => products.filter(p => p.categoryId === catId).length;
 
     return (
-        <div className="h-full flex flex-col lg:flex-row gap-4 relative pb-2 overflow-hidden w-full">
+        <div className="h-full flex flex-col lg:flex-row gap-4 relative p-4 overflow-hidden w-full">
 
 
 

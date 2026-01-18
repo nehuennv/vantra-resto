@@ -387,7 +387,7 @@ const DashboardLayout = () => {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth custom-scrollbar">
+                <div className="flex-1 overflow-y-auto  scroll-smooth custom-scrollbar">
                     <div className="max-w-[1920px] mx-auto h-full">
                         {/* Se pasa setHeaderAction al contexto del Outlet */}
                         <Outlet context={{ openModal: handleOpenModal, setHeaderAction: setHeaderAction }} />
