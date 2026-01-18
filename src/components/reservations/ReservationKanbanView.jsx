@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { createPortal } from 'react-dom'; // Importamos Portal para escapar del Layout
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Clock, CheckCircle2, Zap, LogOut,
     Users, MessageCircle, Phone, Store, Hash,
@@ -19,7 +20,6 @@ import {
     defaultDropAnimationSideEffects
 } from '@dnd-kit/core';
 
-// --- CONFIGURACIÓN DE ESTADO ---
 // --- CONFIGURACIÓN DE ESTADO ---
 const STATUS_CONFIG = {
     pending: {
@@ -95,34 +95,38 @@ const KanbanCard = React.forwardRef(({ res, isOverlay, style, className, onClick
     );
 });
 
-// --- 2. WRAPPER DRAGGABLE ---
 const DraggableKanbanCard = ({ res, ...props }) => {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: res.id,
         data: { res }
     });
 
-    if (isDragging) {
-        // Mantenemos el hueco en la lista, pero invisible
-        return (
-            <div ref={setNodeRef} className="opacity-0 grayscale mb-3">
-                <KanbanCard res={res} />
-            </div>
-        );
-    }
-
-    // Importante: El margen (mb-3) va AQUI AFUERA, no en la tarjeta.
-    // Así, cuando la tarjeta se clona en el overlay, NO lleva el margen, evitando el salto de posición.
     return (
-        <div className="mb-3">
+        <motion.div
+            ref={setNodeRef}
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{
+                opacity: isDragging ? 0 : 1, // Hide original when dragging
+                scale: isDragging ? 0.95 : 1,
+                transition: { duration: 0.2 }
+            }}
+            exit={{
+                opacity: 0,
+                scale: 0.9,
+                transition: { duration: 0.15, ease: "easeIn" }
+            }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="mb-3"
+            {...listeners}
+            {...attributes}
+        >
             <KanbanCard
-                ref={setNodeRef}
                 res={res}
-                {...listeners}
-                {...attributes}
+                className={isDragging ? "opacity-0" : ""} // Double safety: hide content
                 {...props}
             />
-        </div>
+        </motion.div>
     );
 };
 
@@ -151,13 +155,15 @@ const DroppableColumn = ({ statusKey, items, ...props }) => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-                {items.map(res => (
-                    <DraggableKanbanCard
-                        key={res.id}
-                        res={res}
-                        {...props}
-                    />
-                ))}
+                <AnimatePresence mode="popLayout">
+                    {items.map(res => (
+                        <DraggableKanbanCard
+                            key={res.id}
+                            res={res}
+                            {...props}
+                        />
+                    ))}
+                </AnimatePresence>
             </div>
         </div>
     );
@@ -204,6 +210,7 @@ export default function ReservationKanbanView({ reservations, onUpdate }) {
 
     // Configuración de animación al soltar
     const dropAnimation = {
+        duration: 0, // Disable return animation for smoother handoff
         sideEffects: defaultDropAnimationSideEffects({
             styles: {
                 active: { opacity: '0.4' },

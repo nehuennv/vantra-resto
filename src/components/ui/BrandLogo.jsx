@@ -32,7 +32,7 @@ const BrandLogo = ({ collapsed = false }) => {
                             <span className="text-primary">.</span>
                         </span>
                         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest leading-none mt-0.5">
-                            Gestión
+                            Resto
                         </span>
                     </motion.div>
                 )}

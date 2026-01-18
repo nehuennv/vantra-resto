@@ -5,9 +5,10 @@ import { clientConfig } from '../config/client';
 import ProductFormModal from '../components/menu/ProductFormModal';
 import CategoryFormModal from '../components/menu/CategoryFormModal';
 import ImageWithFallback from '../components/ui/ImageWithFallback';
-import { Search, Plus, Edit2, Trash2, UtensilsCrossed, Eye, EyeOff, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, UtensilsCrossed, Eye, EyeOff, X, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ConfirmationModal from '../components/ui/ConfirmationModal';
 
 export default function MenuManagerPage() {
     const { products, categories, addProduct, updateProduct, deleteProduct, addCategory, loading } = useMenu();
@@ -44,6 +45,20 @@ export default function MenuManagerPage() {
     const handleOpenEdit = (product) => {
         setEditingProduct(product);
         setIsProductModalOpen(true);
+    };
+
+    // --- Delete Confirmation Logic ---
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, productId: null });
+
+    const handleDeleteClick = (id) => {
+        setConfirmModal({ isOpen: true, productId: id });
+    };
+
+    const handleConfirmDelete = () => {
+        if (confirmModal.productId) {
+            deleteProduct(confirmModal.productId);
+            setConfirmModal({ isOpen: false, productId: null });
+        }
     };
 
     const handleModalSubmit = (data) => {
@@ -131,7 +146,7 @@ export default function MenuManagerPage() {
                                                 key={product.id}
                                                 product={product}
                                                 onEdit={handleOpenEdit}
-                                                onDelete={deleteProduct}
+                                                onDelete={handleDeleteClick}
                                                 onToggle={updateProduct}
                                             />
                                         ))}
@@ -202,6 +217,14 @@ export default function MenuManagerPage() {
                 onSubmit={addCategory}
             />
 
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                check={handleConfirmDelete}
+                title="¿Eliminar Plato?"
+                message="Esta acción no se puede deshacer. El producto será eliminado permanentemente del menú."
+            />
+
             {loading && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-50 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -240,25 +263,34 @@ function CategoryItem({ label, count, isActive, onClick }) {
 
 function ProductCard({ product, onEdit, onDelete, onToggle }) {
     const isAvailable = product.available;
+
     return (
         <motion.div
             layout
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: isAvailable ? 1 : 0.7, scale: 1 }}
+            animate={{ opacity: isAvailable ? 1 : 0.6, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
             className={`
-                group relative flex flex-col bg-card rounded-2xl border border-border shadow-sm 
-                hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden
+                group relative flex flex-col bg-card rounded-2xl border border-border/60 shadow-sm 
+                hover:shadow-lg hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden
             `}
         >
             {/* Image Section */}
-            <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+            <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                 <ImageWithFallback
                     src={product.image}
                     alt={product.name}
-                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${!isAvailable ? 'grayscale' : ''}`}
+                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!isAvailable ? 'grayscale opacity-70' : ''}`}
                 />
+
+                {/* Discount Badge */}
+                {product.discountPrice && (
+                    <div className="absolute top-2 left-2 px-2.5 py-1 rounded-full text-[10px] font-bold backdrop-blur-md border border-white/10 shadow-sm bg-purple-500/90 text-white flex items-center gap-1.5 z-10">
+                        <Tag size={12} />
+                        OFERTA
+                    </div>
+                )}
 
                 {/* Available Badge / Toggle */}
                 <button
@@ -267,10 +299,10 @@ function ProductCard({ product, onEdit, onDelete, onToggle }) {
                         onToggle(product.id, { available: !product.available });
                     }}
                     className={`
-                        absolute top-2 right-2 px-2 py-1 rounded-md text-[10px] font-bold backdrop-blur-md border border-white/10 shadow-sm transition-all flex items-center gap-1.5
+                        absolute top-2 right-2 px-2.5 py-1 rounded-full text-[10px] font-bold backdrop-blur-md border border-white/10 shadow-sm transition-all flex items-center gap-1.5 z-10
                         ${isAvailable
                             ? 'bg-emerald-500/90 text-white hover:bg-emerald-600'
-                            : 'bg-zinc-800/90 text-zinc-400 hover:bg-zinc-800'}
+                            : 'bg-black/60 text-white/70 hover:bg-black/80'}
                     `}
                 >
                     {isAvailable ? <Eye size={12} /> : <EyeOff size={12} />}
@@ -278,54 +310,79 @@ function ProductCard({ product, onEdit, onDelete, onToggle }) {
                 </button>
 
                 {/* Actions Overlay (Hover) */}
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 z-20">
                     <button
                         onClick={() => onEdit(product)}
-                        className="h-10 w-10 bg-white rounded-full flex items-center justify-center text-zinc-900 hover:scale-110 hover:bg-zinc-100 transition-all shadow-lg"
+                        className="h-11 w-11 bg-white rounded-full flex items-center justify-center text-zinc-900 hover:scale-110 hover:bg-zinc-50 transition-all shadow-xl"
+                        title="Editar Plato"
                     >
-                        <Edit2 size={18} />
+                        <Edit2 size={20} strokeWidth={2} />
                     </button>
                     <button
                         onClick={() => onDelete(product.id)}
-                        className="h-10 w-10 bg-red-500 rounded-full flex items-center justify-center text-white hover:scale-110 hover:bg-red-600 transition-all shadow-lg"
+                        className="h-11 w-11 bg-red-500 rounded-full flex items-center justify-center text-white hover:scale-110 hover:bg-red-600 transition-all shadow-xl"
+                        title="Eliminar Plato"
                     >
-                        <Trash2 size={18} />
+                        <Trash2 size={20} strokeWidth={2} />
                     </button>
                 </div>
             </div>
 
             {/* Content Body */}
-            <div className="p-4 flex flex-col flex-1 gap-1">
-                <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-bold text-foreground leading-tight line-clamp-2 text-sm">
+            <div className="p-4 flex flex-col flex-1 gap-2">
+                <div className="flex justify-between items-start gap-3">
+                    <h3 className="font-bold text-foreground leading-snug line-clamp-2 text-sm flex-1">
                         {product.name}
                     </h3>
-                    <span className="font-mono font-bold text-sm whitespace-nowrap text-primary">
-                        ${product.price ? product.price.toLocaleString() : '0'}
-                    </span>
+                    <div className="flex flex-col items-end">
+                        {product.discountPrice ? (
+                            <>
+                                <span className="text-[10px] text-muted-foreground line-through decoration-muted-foreground/50">
+                                    ${product.price?.toLocaleString()}
+                                </span>
+                                <span className="font-mono font-bold text-sm whitespace-nowrap text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">
+                                    ${product.discountPrice.toLocaleString()}
+                                </span>
+                            </>
+                        ) : (
+                            <span className="font-mono font-bold text-sm whitespace-nowrap text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/10">
+                                ${product.price ? product.price.toLocaleString() : '0'}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
-                <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed h-8 mb-2">
-                    {product.description || "Sin descripción"}
+                {/* AQUÍ ESTÁ LA SOLUCIÓN:
+                   Cambié h-8 (32px) por h-10 (40px). 
+                   Esto da el espacio justo para 2 líneas de texto con interlineado relajado.
+                */}
+                <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed h-10 mb-1">
+                    {product.description || <span className="italic opacity-50">Sin descripción añadida.</span>}
                 </p>
 
                 {/* Ingredients / Tags */}
-                <div className="mt-auto flex flex-wrap gap-1">
+                <div className="mt-auto flex flex-wrap gap-1.5 pt-2 border-t border-border/40">
                     {product.ingredients?.length > 0 ? (
-                        product.ingredients.slice(0, 3).map((ing, idx) => (
-                            <span key={idx} className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 bg-secondary text-secondary-foreground rounded border border-border/40">
-                                {ing}
-                            </span>
-                        ))
+                        <>
+                            {product.ingredients.slice(0, 3).map((ing, idx) => (
+                                <span key={idx} className="text-[10px] font-medium px-2 py-1 bg-secondary/50 text-secondary-foreground rounded-md border border-border/50">
+                                    {ing}
+                                </span>
+                            ))}
+                            {product.ingredients.length > 3 && (
+                                <span className="text-[10px] text-muted-foreground px-1 py-1 font-medium">
+                                    +{product.ingredients.length - 3}
+                                </span>
+                            )}
+                        </>
                     ) : (
-                        <span className="text-[10px] text-muted-foreground/40 italic">...</span>
+                        <span className="text-[10px] text-muted-foreground/40 italic py-1">Sin ingredientes</span>
                     )}
                 </div>
             </div>
         </motion.div>
     );
 }
-
 function EmptyState({ onAction }) {
     return (
         <div className="h-full flex flex-col items-center justify-center text-center opacity-60 min-h-[400px]">

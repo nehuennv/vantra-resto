@@ -30,7 +30,7 @@ const COLOR_VARIANTS = {
 };
 
 // <--- CAMBIA ESTO PARA PROBAR COLORES
-const ACTIVE_COLOR = COLOR_VARIANTS.Terracotta;
+const ACTIVE_COLOR = COLOR_VARIANTS.OceanBlue;
 
 export const clientConfig = {
 

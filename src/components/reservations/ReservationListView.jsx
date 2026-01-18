@@ -189,14 +189,43 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                 {isSelected && (
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="border-t border-border bg-muted/20"
+                        animate={{
+                            height: "auto",
+                            opacity: 1,
+                            transition: {
+                                height: { duration: 0.4, ease: [0.32, 0.72, 0, 1] },
+                                opacity: { duration: 0.2, delay: 0.1 }
+                            }
+                        }}
+                        exit={{
+                            height: 0,
+                            opacity: 0,
+                            transition: {
+                                height: { duration: 0.3, ease: [0.32, 0.72, 0, 1] },
+                                opacity: { duration: 0.1 }
+                            }
+                        }}
+                        className="border-t border-border bg-muted/20 overflow-hidden"
                     >
-                        <div className="p-4 pt-3">
+                        <motion.div
+                            className="p-4 pt-3"
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            variants={{
+                                visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+                                hidden: { transition: { staggerChildren: 0.02, staggerDirection: -1 } }
+                            }}
+                        >
 
                             {/* METADATOS (Fila superior) */}
-                            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                            <motion.div
+                                variants={{
+                                    hidden: { opacity: 0, y: 10, filter: "blur(4px)" },
+                                    visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.3, ease: "easeOut" } }
+                                }}
+                                className="flex flex-col sm:flex-row gap-3 mb-4"
+                            >
                                 {/* Notas */}
                                 <div className="flex-1 bg-background border border-border rounded-md p-2.5 shadow-sm">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
@@ -221,10 +250,16 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                         </span>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
 
                             {/* BOTONERA (Standard Size h-10) */}
-                            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:h-10">
+                            <motion.div
+                                variants={{
+                                    hidden: { opacity: 0, y: 5 },
+                                    visible: { opacity: 1, y: 0, transition: { duration: 0.3, delay: 0.1 } }
+                                }}
+                                className="flex flex-col sm:flex-row items-stretch gap-3 sm:h-10"
+                            >
 
                                 {/* 1. Grupo Herramientas (Botones Acciones) */}
                                 <div className="flex gap-3 shrink-0 h-10 sm:h-auto">
@@ -237,6 +272,8 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                                 : "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:border-red-300 hover:shadow-red-500/10"
                                         )}
                                         title="Eliminar Reserva"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.95 }}
                                     >
                                         <Trash2 size={16} strokeWidth={2.5} />
                                         <span className="hidden sm:inline">{confirmAction === 'delete' ? "¿Confirmar?" : "Eliminar"}</span>
@@ -246,6 +283,8 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                         onClick={(e) => { e.stopPropagation(); onEdit(res); }}
                                         className="relative px-4 h-full flex items-center justify-center gap-2 rounded-md border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:border-indigo-300 hover:shadow-indigo-500/10 transition-all duration-300 text-sm font-bold shadow-sm"
                                         title="Editar Datos"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.95 }}
                                     >
                                         <Pencil size={16} strokeWidth={2.5} />
                                         <span className="hidden sm:inline">Editar</span>
@@ -263,6 +302,8 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                             }}
                                             className="w-full h-full rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 hover:border-emerald-300 transition-all duration-300 font-black text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2"
                                             title="Confirmar Reserva"
+                                            whileHover={{ scale: 1.02, backgroundColor: "rgba(16, 185, 129, 0.15)" }}
+                                            whileTap={{ scale: 0.98 }}
                                         >
                                             <CheckCircle2 size={16} strokeWidth={3} />
                                             <span>Confirmar Solicitud</span>
@@ -278,6 +319,8 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                             }}
                                             className="w-full h-full rounded-md bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/20 hover:border-amber-300 transition-all duration-300 font-black text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2"
                                             title="Marcar como Llegó"
+                                            whileHover={{ scale: 1.02, backgroundColor: "rgba(245, 158, 11, 0.15)" }}
+                                            whileTap={{ scale: 0.98 }}
                                         >
                                             <Zap size={16} fill="currentColor" strokeWidth={0} />
                                             <span>¡Llegó al Local!</span>
@@ -297,6 +340,8 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                                     : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300"
                                             )}
                                             title="Liberar Mesa"
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
                                         >
                                             <LogOut size={16} strokeWidth={2.5} />
                                             <span>{confirmAction === 'release' ? "¿Confirmar Salida?" : "Liberar Mesa"}</span>
@@ -309,9 +354,9 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </motion.div>
 
-                        </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
