@@ -33,9 +33,39 @@ const TimeGroupHeader = ({ time, count }) => (
     </div>
 );
 
+// --- CONFIGURACIÓN DE ANIMACIONES ---
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.05,
+            delayChildren: 0.05
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 10, filter: "blur(2px)" },
+    visible: {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        transition: {
+            duration: 0.3,
+            ease: "easeOut"
+        }
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.95,
+        transition: { duration: 0.2 }
+    }
+};
+
 // --- COMPONENTE: TARJETA DE INGENIERÍA (SOLIDA & ROBUSTA) ---
 // (VERSIÓN ORIGINAL PRESERVADA AL 100%)
-const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit }) => {
+const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit, ...props }) => {
     const { theme } = useTheme();
     const [confirmAction, setConfirmAction] = useState(null);
 
@@ -100,9 +130,7 @@ const ReservationCard = ({ res, isSelected, onClick, onUpdate, onDelete, onEdit 
 
     return (
         <motion.div
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            {...props}
             className={cn(
                 "group relative w-full overflow-hidden transition-all duration-200", // Quitamos cursor-pointer global
                 "bg-card border border-border/60 rounded-lg shadow-sm hover:shadow-md hover:bg-card/80 hover:border-primary/20 hover:z-10", // Mejor feedback hover
@@ -377,12 +405,18 @@ const ReservationListView = ({ reservations, selectedId, onSelect, onUpdate, onD
                         {/* SEPARADOR DE FRANJA HORARIA */}
                         <TimeGroupHeader time={group.time} count={group.items.length} />
 
-                        {/* LISTA DE TARJETAS EN ESA HORA */}
-                        <div className="space-y-3">
+                        {/* LISTA DE TARJETAS CON STAGGER */}
+                        <motion.div
+                            className="space-y-3"
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
                             {group.items.map(res => (
                                 <ReservationCard
                                     key={res.id}
                                     res={res}
+                                    variants={itemVariants}
                                     isSelected={selectedId === res.id}
                                     onClick={onSelect}
                                     onUpdate={onUpdate}
@@ -390,7 +424,7 @@ const ReservationListView = ({ reservations, selectedId, onSelect, onUpdate, onD
                                     onEdit={onEdit}
                                 />
                             ))}
-                        </div>
+                        </motion.div>
                     </div>
                 ))}
             </div>

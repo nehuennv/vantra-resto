@@ -267,13 +267,19 @@ function ProductCard({ product, onEdit, onDelete, onToggle }) {
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: isAvailable ? 1 : 0.6, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
+            animate={{ opacity: isAvailable ? 1 : 0.6, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.5, filter: "blur(4px)", transition: { duration: 0.2 } }}
+            whileHover={{ y: -5 }}
+            transition={{
+                layout: { type: "spring", stiffness: 300, damping: 28 },
+                opacity: { duration: 0.2 },
+                scale: { duration: 0.2 },
+                filter: { duration: 0.2 }
+            }}
             className={`
                 group relative flex flex-col bg-card rounded-2xl border border-border/60 shadow-sm 
-                hover:shadow-lg hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden
+                hover:shadow-xl hover:border-primary/20 transition-colors duration-300 overflow-hidden
             `}
         >
             {/* Image Section */}

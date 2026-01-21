@@ -6,7 +6,6 @@
 
 /* --- RESET GLOBAL & OPTIMIZACIONES --- */
 :root {
-  /* Scroll suave en toda la app */
   scroll-behavior: smooth;
 }
 
@@ -14,78 +13,66 @@
 *::before,
 *::after {
   -webkit-tap-highlight-color: transparent;
-  /* Adiós flash azul en móvil */
-  /* UX Premium: Bordes más suaves en renderizado */
   border-collapse: collapse;
 }
 
-/* --- FIX: BORDES DESAPARECIDOS ---
-   Eliminé 'border-color: transparent' y 'box-shadow: none' del *:active 
-   para que tus botones y inputs no pierdan estilo al hacer click.
-*/
 *:focus,
 *:focus-visible {
   outline: none !important;
 }
 
-/* Solo quitamos el outline nativo feo, pero respetamos tus bordes y rings de Tailwind */
 input:focus,
 textarea:focus,
 select:focus {
   outline: none !important;
-  /* El color del borde lo maneja Tailwind con 'focus:border-primary' */
 }
 
 @layer base {
   :root {
     /* --- LIGHT MODE (Clínico, Limpio, Profesional) --- */
     --background: 0 0% 100%;
-    /* Blanco Puro */
     --foreground: 222.2 84% 4.9%;
-    /* Slate 950 */
 
-    /* --- SISTEMA DE COLOR ADAPTATIVO (Aura) --- */
-    /* Estos valores son SOBREESCRITOS automáticamente por src/lib/theme.js basado en client.js */
     /* Valores por defecto (Fallback) */
     --base-hue: 220;
     --base-sat: 80%;
 
     /* --- LIGHT MODE (Tinta suave) --- */
-    --background: var(--base-hue) 30% 99%;
+    --background: var(--base-hue) 15% 99%;
+    /* Más blanco */
     --foreground: var(--base-hue) 50% 10%;
 
-    --card: var(--base-hue) 30% 97%;
+    --card: var(--base-hue) 15% 97%;
     --card-foreground: var(--base-hue) 50% 10%;
 
-    --popover: var(--base-hue) 30% 99%;
+    --popover: var(--base-hue) 15% 99%;
     --popover-foreground: var(--base-hue) 50% 10%;
 
     --primary: var(--base-hue) var(--base-sat) 60%;
     --primary-light: var(--base-hue) var(--base-sat) 75%;
-    /* Tono Complementario Claro */
     --primary-dark: var(--base-hue) var(--base-sat) 45%;
-    /* Tono Complementario Oscuro */
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: var(--base-hue) 20% 94%;
+    --secondary: var(--base-hue) 10% 96%;
     --secondary-foreground: var(--base-hue) 50% 10%;
 
-    --muted: var(--base-hue) 20% 94%;
+    --muted: var(--base-hue) 10% 96%;
     --muted-foreground: var(--base-hue) 10% 40%;
 
-    --accent: var(--base-hue) 20% 92%;
+    --accent: var(--base-hue) 10% 94%;
     --accent-foreground: var(--base-hue) 50% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: var(--base-hue) 20% 90%;
-    --input: var(--base-hue) 20% 90%;
+    --border: var(--base-hue) 10% 90%;
+    --input: var(--base-hue) 10% 90%;
     --ring: var(--base-hue) var(--base-sat) 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    /* Más redondeado (12px) */
 
-    /* Variables de Gráficos (Shadcn Charts) */
+    /* Variables Charts */
     --chart-1: var(--base-hue) var(--base-sat) 60%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -94,43 +81,43 @@ select:focus {
   }
 
   .dark {
-    /* --- DARK MODE (Deep Tinted Aura) --- */
-    /* El fondo NO es negro ni gris, es un tono muy oscuro de tu color principal */
+    /* --- DARK MODE REFINADO (Deep Tinted Neutral) --- */
+    /* Saturación ajustada al 12-15% para que se note el color pero siga siendo neutro */
 
-    --background: var(--base-hue) 40% 6%;
-    /* Fondo profundo con tinte */
+    --background: var(--base-hue) 14% 5%;
+    /* Negro profundo tintado */
     --foreground: var(--base-hue) 10% 98%;
 
-    --card: var(--base-hue) 35% 10%;
-    /* Tarjetas apenas más claras */
+    --card: var(--base-hue) 14% 7%;
+    /* Apenas más claro */
     --card-foreground: var(--base-hue) 10% 98%;
 
-    --popover: var(--base-hue) 35% 9%;
+    --popover: var(--base-hue) 14% 7%;
     --popover-foreground: var(--base-hue) 10% 98%;
 
+    /* Primary Vibrante */
     --primary: var(--base-hue) var(--base-sat) 60%;
     --primary-light: var(--base-hue) var(--base-sat) 75%;
     --primary-dark: var(--base-hue) var(--base-sat) 45%;
-    --primary-foreground: 222 47.4% 11.2%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: var(--base-hue) 30% 15%;
+    --secondary: var(--base-hue) 14% 12%;
     --secondary-foreground: var(--base-hue) 10% 98%;
 
-    --muted: var(--base-hue) 30% 15%;
-    --muted-foreground: var(--base-hue) 20% 70%;
+    --muted: var(--base-hue) 14% 12%;
+    --muted-foreground: var(--base-hue) 10% 65%;
 
-    --accent: var(--base-hue) 30% 20%;
+    --accent: var(--base-hue) 14% 15%;
     --accent-foreground: var(--base-hue) 10% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: var(--base-hue) 30% 20%;
-    /* Bordes sutiles tintados */
-    --input: var(--base-hue) 30% 20%;
+    --border: var(--base-hue) 14% 12%;
+    --input: var(--base-hue) 14% 12%;
     --ring: var(--base-hue) var(--base-sat) 60%;
 
-    /* Variables de Gráficos Dark Mode */
+    /* Charts Dark */
     --chart-1: var(--base-hue) var(--base-sat) 60%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -142,36 +129,29 @@ select:focus {
 /* --- ESTILOS BASE DEL BODY --- */
 body {
   @apply bg-background text-foreground font-sans antialiased;
-  /* Renderizado de fuentes HD para Mac/iOS */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-
-  /* Transición optimizada */
-  transition-property: background-color, color;
-  transition-duration: 300ms;
-  transition-timing-function: ease-in-out;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* --- BACKGROUND DARK MODE (DYNAMIC GLOW) --- */
 .dark body {
-  /* Fondo base tintado */
   background-color: hsl(var(--background));
 
-  /* Gradientes de "Aura" usando el mismo matiz */
+  /* Opacidad al 0.06/0.04 para mantener la sutileza pero visible */
   background-image:
-    radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 60%),
-    radial-gradient(circle at 0% 0%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 0% 0%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.05) 0%, transparent 50%);
   background-attachment: fixed;
   background-size: cover;
 }
 
-/* --- SCROLLBARS PREMIUM (GLOBAL) --- */
+/* --- SCROLLBARS --- */
 ::-webkit-scrollbar {
-  width: 5px;
-  /* Más fina */
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -179,38 +159,20 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300/80 dark:bg-slate-700/50;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  background-clip: content-box;
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-slate-600;
-}
-
-/* Firefox Support */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--border)) transparent;
-}
-
-/* --- UTILITIES --- */
+/* Utilities */
 @layer utilities {
-
-  /* Ocultar scrollbar pero permitir scroll */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
   .no-scrollbar {
     -ms-overflow-style: none;
-    /* IE/Edge */
     scrollbar-width: none;
-    /* Firefox */
   }
 
-  /* --- CLASE ESPECIAL PARA CONTENEDORES INTERNOS --- */
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
@@ -220,18 +182,6 @@ body {
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-gray-200 dark:bg-white/10;
-    border-radius: 4px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-300 dark:bg-white/20;
-  }
-}
-
-/* Animaciones */
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
+    @apply bg-border/50 rounded-full hover:bg-border;
   }
 }

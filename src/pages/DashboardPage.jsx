@@ -312,7 +312,7 @@ const DashboardPage = () => {
                                     <div className={cn(
                                         "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-muted transition-colors duration-300",
                                         aiReport.color === 'rose' ? "border-rose-500/40 text-rose-500" :
-                                            aiReport.color === 'amber' ? "border-amber-500/40 text-amber-500" :
+                                            aiReport.color === 'yellow' ? "border-yellow-500/40 text-yellow-500" :
                                                 aiReport.color === 'blue' ? "border-blue-500/40 text-blue-500" :
                                                     "border-emerald-500/40 text-emerald-500"
                                     )}>
@@ -321,7 +321,7 @@ const DashboardPage = () => {
                                     <div className="flex flex-col">
                                         <h4 className={cn("text-xs sm:text-sm font-bold transition-colors line-clamp-1",
                                             aiReport.color === 'rose' ? "text-rose-500" :
-                                                aiReport.color === 'amber' ? "text-amber-500" :
+                                                aiReport.color === 'yellow' ? "text-yellow-500" :
                                                     aiReport.color === 'blue' ? "text-blue-500" :
                                                         "text-emerald-500"
                                         )}>
@@ -336,13 +336,13 @@ const DashboardPage = () => {
                                     <div className={cn(
                                         "px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider border flex items-center gap-2 transition-colors shrink-0 justify-center sm:justify-start",
                                         aiReport.color === 'rose' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" :
-                                            aiReport.color === 'amber' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
+                                            aiReport.color === 'yellow' ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-500" :
                                                 aiReport.color === 'blue' ? "bg-blue-500/10 border-blue-500/20 text-blue-500" :
                                                     "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                                     )}>
                                         <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse",
                                             aiReport.color === 'rose' ? "bg-rose-500" :
-                                                aiReport.color === 'amber' ? "bg-amber-500" :
+                                                aiReport.color === 'yellow' ? "bg-yellow-500" :
                                                     aiReport.color === 'blue' ? "bg-blue-500" :
                                                         "bg-emerald-500"
                                         )} />
@@ -385,15 +385,12 @@ const DashboardPage = () => {
             </ScrollArea>
 
             {/* MODAL fuera del ScrollArea para evitar problemas de Z-Index/Clipping */}
-            <AnimatePresence>
-                {isInsightModalOpen && (
-                    <IntelligenceModal
-                        isOpen={isInsightModalOpen}
-                        onClose={() => setInsightModalOpen(false)}
-                        data={aiReport}
-                    />
-                )}
-            </AnimatePresence>
+            {/* MODAL fuera del ScrollArea para evitar problemas de Z-Index/Clipping */}
+            <IntelligenceModal
+                isOpen={isInsightModalOpen}
+                onClose={() => setInsightModalOpen(false)}
+                data={aiReport}
+            />
 
         </div>
     );

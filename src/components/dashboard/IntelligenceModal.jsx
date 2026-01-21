@@ -31,42 +31,50 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
         hidden: { opacity: 0 },
         show: {
             opacity: 1,
-            transition: { staggerChildren: 0.1 }
+            transition: { staggerChildren: 0.08, delayChildren: 0.1 }
         }
     };
 
     const itemVariants = {
-        hidden: { opacity: 0, x: -20 },
-        show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 50 } }
+        hidden: { opacity: 0, y: 15, scale: 0.98, filter: "blur(4px)" },
+        show: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            filter: "blur(0px)",
+            transition: { type: "spring", stiffness: 80, damping: 15 }
+        }
     };
 
     return (
         <AnimatePresence>
             {isOpen && data && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-sans">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-sans"
+                >
 
                     {/* BACKDROP: Utiliza variables de color del sistema (generalmente oscuro) */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                    <div
                         onClick={onClose}
                         className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[90]"
                     />
 
                     {/* MODAL CARD: Adaptativo al Theme del Cliente */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+                        initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)", transition: { duration: 0.2 } }}
+                        transition={{ type: "spring", duration: 0.5, bounce: 0, damping: 20, stiffness: 100 }}
                         // Uso de bg-card/95 para respetar modo dark/light y border-border
                         className="relative w-full max-w-2xl bg-card/95 backdrop-blur-2xl border border-border rounded-3xl shadow-2xl overflow-hidden z-[100] flex flex-col max-h-[85vh]"
                     >
                         {/* Glow Superior Semántico */}
                         <div className={cn("absolute top-0 inset-x-0 h-[1px] w-full bg-gradient-to-r from-transparent via-current to-transparent opacity-50",
                             data.color === 'rose' ? "text-rose-500" :
-                                data.color === 'amber' ? "text-amber-500" :
+                                data.color === 'yellow' ? "text-yellow-500" :
                                     data.color === 'blue' ? "text-blue-500" :
                                         "text-emerald-500"
                         )} />
@@ -78,7 +86,7 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                                     <div className={cn(
                                         "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border shadow-sm backdrop-blur-md transition-colors",
                                         data.color === 'rose' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" :
-                                            data.color === 'amber' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
+                                            data.color === 'yellow' ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-500" :
                                                 data.color === 'blue' ? "bg-blue-500/10 border-blue-500/20 text-blue-500" :
                                                     "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                                     )}>
@@ -90,7 +98,7 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                                             <h2 className="text-xl font-bold text-foreground tracking-tight">Asistente de IA</h2>
                                             <div className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border backdrop-blur-sm",
                                                 data.color === 'rose' ? "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400" :
-                                                    data.color === 'amber' ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400" :
+                                                    data.color === 'yellow' ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-600 dark:text-yellow-400" :
                                                         data.color === 'blue' ? "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400" :
                                                             "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                                             )}>
@@ -131,14 +139,14 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                                         className={cn(
                                             "group flex gap-5 p-5 rounded-2xl border transition-all duration-500 bg-card",
                                             isCriticalItem ? "bg-rose-500/5 border-rose-500/20" :
-                                                isAlertItem ? "bg-amber-500/5 border-amber-500/20" :
+                                                isAlertItem ? "bg-yellow-500/5 border-yellow-500/20" :
                                                     "bg-background/50 border-border hover:border-primary/20 hover:shadow-sm"
                                         )}
                                     >
                                         <div className={cn(
                                             "p-3.5 rounded-xl h-fit shrink-0 border bg-background",
                                             isCriticalItem ? "text-rose-500 border-rose-500/20" :
-                                                isAlertItem ? "text-amber-500 border-amber-500/20" :
+                                                isAlertItem ? "text-yellow-500 border-yellow-500/20" :
                                                     "text-muted-foreground border-border group-hover:text-primary group-hover:border-primary/20 transition-colors"
                                         )}>
                                             <Icon size={20} strokeWidth={2} />
@@ -148,7 +156,7 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                                             <div className="flex items-center justify-between gap-2 mb-2">
                                                 <h4 className={cn("text-sm font-bold tracking-wide transition-colors",
                                                     isCriticalItem ? "text-rose-600 dark:text-rose-400" :
-                                                        isAlertItem ? "text-amber-600 dark:text-amber-400" : "text-foreground"
+                                                        isAlertItem ? "text-yellow-600 dark:text-yellow-400" : "text-foreground"
                                                 )}>
                                                     {item.title}
                                                 </h4>
@@ -190,7 +198,7 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                             <div className="flex items-center gap-3">
                                 <span className={cn("relative flex h-2 w-2",
                                     data.color === 'rose' ? "text-rose-500" :
-                                        data.color === 'amber' ? "text-amber-500" :
+                                        data.color === 'yellow' ? "text-yellow-500" :
                                             data.color === 'blue' ? "text-blue-500" :
                                                 "text-emerald-500"
                                 )}>
@@ -209,7 +217,7 @@ const IntelligenceModal = ({ isOpen, onClose, data }) => {
                             </div>
                         </div>
                     </motion.div>
-                </div>
+                </motion.div>
             )}
         </AnimatePresence>
     );
